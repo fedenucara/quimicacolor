@@ -689,7 +689,8 @@ saveCarrito();
 // SKU de un envase: código de producto + kilos en dos cifras (CA-AMA-01-05 = 5 kg)
 function skuEnvase(p, kg) { return p.sku ? p.sku + '-' + String(kg).padStart(2, '0') : ''; }
 
-function esLiquido(p) { return p.categoria === 'colorantes' && p.subcategoria === 'Otros'; }
+// Colorantes líquidos (liquido:true en la ficha): el envase más grande es de 20 kg, no 25.
+function esLiquido(p) { return p.liquido === true; }
 
 // Regla de precios por volumen: 5% menos desde 5 kg, 10% menos desde 10 kg.
 // Si la ficha tiene ese escalón cargado a mano, manda el de la ficha.
@@ -1101,7 +1102,7 @@ function _serializarProductos() {
     const precio200= p.precio200 != null ? p.precio200 : 'null';
     const desc    = p.descripcion ? `"${p.descripcion.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')}"` : 'null';
     const fichas  = (p.fichas && p.fichas.length) ? `, fichas:${JSON.stringify(p.fichas)}` : '';
-    const sku     = (p.sku ? `, sku:"${p.sku}"` : '') + (p.skuVsl ? `, skuVsl:"${p.skuVsl}"` : '') + (p.maxKg != null ? `, maxKg:${p.maxKg}` : '');
+    const sku     = (p.sku ? `, sku:"${p.sku}"` : '') + (p.skuVsl ? `, skuVsl:"${p.skuVsl}"` : '') + (p.maxKg != null ? `, maxKg:${p.maxKg}` : '') + (p.liquido ? ', liquido:true' : '');
     if (p.id === 'aditivo-opacante') {
       return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}${fichas}, descripcion:${desc} }`;
     }
