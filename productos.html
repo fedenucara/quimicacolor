@@ -769,6 +769,20 @@ function showVariantPicker(id, btn) {
   });
 }
 
+// Tope de kilos por producto en un pedido web. No se muestra en la página: solo frena pedidos
+// desmedidos y manda a WhatsApp. Cambiarlo acá si hace falta.
+const MAX_KG_POR_PRODUCTO = 25;
+const _kgDeItem = id => { const m = id.match(/_(\d+)kg$/); return m ? Number(m[1]) : 0; };
+const _prodDeItem = id => id.replace(/_\d+kg$/, '');
+function kgEnCarrito(prodId) {
+  return carrito.filter(i => _prodDeItem(i.id) === prodId).reduce((s, i) => s + _kgDeItem(i.id) * i.cantidad, 0);
+}
+function _superaTope(prodId, kgNuevos, nombre) {
+  if (kgEnCarrito(prodId) + kgNuevos <= MAX_KG_POR_PRODUCTO) return false;
+  _showCartError(`Para pedir más de ${MAX_KG_POR_PRODUCTO} kg de ${nombre} escribinos por WhatsApp y lo cotizamos aparte.`);
+  return true;
+}
+
 function _addVariantToCart(prod, varKey, varLabel, precioKg, kg, btn) {
   const precioTotal = (precioKg != null) ? Number(precioKg) * kg : null;
   const cartId = prod.id + '_' + varKey;
@@ -779,6 +793,7 @@ function _addVariantToCart(prod, varKey, varLabel, precioKg, kg, btn) {
     _showCartError(`Sin stock suficiente: quedan ${stockU} unidad/es de ${prod.nombre} (${varLabel}).`);
     return;
   }
+  if (_superaTope(prod.id, kg, prod.nombre)) return;
   if (existing) { existing.cantidad++; }
   else {
     carrito.push({ id: cartId, nombre: prod.nombre, variante: varLabel,
@@ -804,6 +819,7 @@ function changeQty(id, delta) {
       _showCartError(`Sin stock suficiente: quedan ${stockU} unidad/es de ${item.nombre} (${item.variante}).`);
       return;
     }
+    if (_superaTope(_prodDeItem(id), _kgDeItem(id), item.nombre)) return;
   }
   item.cantidad += delta;
   if (item.cantidad <= 0) carrito = carrito.filter(i => i.id !== id);
@@ -890,7 +906,7 @@ function _showCartError(msg) {
   el.textContent = msg;
   el.style.display = 'block';
   clearTimeout(el._t);
-  el._t = setTimeout(() => { el.style.display = 'none'; }, 3000);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 6000);
 }
 
 function closeCart() {
