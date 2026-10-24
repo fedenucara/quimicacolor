@@ -749,7 +749,7 @@ function showVariantPicker(id, btn) {
     // Unidades por envase: solo existen si se cargaron desde el admin en este navegador.
     // Si no hay dato (null), manda el estado general del producto (stock / nostock / consultar).
     const stockU  = getStock(cartId);
-    const sinStock = stockU != null ? stockU <= 0 : prod.stock === 'nostock';
+    const sinStock = (stockU != null ? stockU <= 0 : prod.stock === 'nostock') || v.kg > _topeDe(prod.id);
     const stockTag = stockU == null ? ''
       : stockU > 0
       ? `<span style="font-size:10px;color:#15803d;font-weight:600;">● ${stockU} unid. disp.</span>`
@@ -777,9 +777,15 @@ const _prodDeItem = id => id.replace(/_\d+kg$/, '');
 function kgEnCarrito(prodId) {
   return carrito.filter(i => _prodDeItem(i.id) === prodId).reduce((s, i) => s + _kgDeItem(i.id) * i.cantidad, 0);
 }
+// Si el producto tiene maxKg cargado (stock real), manda ese; si no, el tope general.
+function _topeDe(prodId) {
+  const p = DATOS.find(x => x.id === prodId);
+  return (p && p.maxKg != null) ? p.maxKg : MAX_KG_POR_PRODUCTO;
+}
 function _superaTope(prodId, kgNuevos, nombre) {
-  if (kgEnCarrito(prodId) + kgNuevos <= MAX_KG_POR_PRODUCTO) return false;
-  _showCartError(`Para pedir más de ${MAX_KG_POR_PRODUCTO} kg de ${nombre} escribinos por WhatsApp y lo cotizamos aparte.`);
+  const tope = _topeDe(prodId);
+  if (kgEnCarrito(prodId) + kgNuevos <= tope) return false;
+  _showCartError(`Para pedir más de ${tope} kg de ${nombre} escribinos por WhatsApp y lo cotizamos aparte.`);
   return true;
 }
 
@@ -1095,7 +1101,7 @@ function _serializarProductos() {
     const precio200= p.precio200 != null ? p.precio200 : 'null';
     const desc    = p.descripcion ? `"${p.descripcion.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')}"` : 'null';
     const fichas  = (p.fichas && p.fichas.length) ? `, fichas:${JSON.stringify(p.fichas)}` : '';
-    const sku     = (p.sku ? `, sku:"${p.sku}"` : '') + (p.skuVsl ? `, skuVsl:"${p.skuVsl}"` : '');
+    const sku     = (p.sku ? `, sku:"${p.sku}"` : '') + (p.skuVsl ? `, skuVsl:"${p.skuVsl}"` : '') + (p.maxKg != null ? `, maxKg:${p.maxKg}` : '');
     if (p.id === 'aditivo-opacante') {
       return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}${fichas}, descripcion:${desc} }`;
     }
