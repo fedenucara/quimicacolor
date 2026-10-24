@@ -612,7 +612,7 @@ function openProductDetail(id) {
     : `<div class="pm-prices">
     <div class="pm-price-row"><span class="pm-price-lbl">1 kg</span>${fmtP(p.precio)}</div>
     <div class="pm-price-row"><span class="pm-price-lbl">5 kg</span>${fmtP(precioKg(p,5))}</div>
-    <div class="pm-price-row"><span class="pm-price-lbl">25 kg</span>${fmtP(precioKg(p,25))}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">${esLiquido(p) ? 20 : 25} kg</span>${fmtP(precioKg(p, esLiquido(p) ? 20 : 25))}</div>
   </div>`;
 
   const descHTML = p.descripcion
@@ -675,6 +675,9 @@ carrito = carrito.map(({ id, nombre, variante, categoria, subcategoria, precio, 
 function saveCarrito() { localStorage.setItem('qc_carrito', JSON.stringify(carrito)); }
 saveCarrito();
 
+// Los colorantes de la subcategoría "Otros" son líquidos: el envase más grande es de 20 kg (no 25).
+function esLiquido(p) { return p.categoria === 'colorantes' && p.subcategoria === 'Otros'; }
+
 // Regla de precios por volumen: 5% menos desde 5 kg, 10% menos desde 10 kg.
 // Si la ficha tiene ese escalón cargado a mano, manda el de la ficha.
 function precioKg(p, kg) {
@@ -702,7 +705,9 @@ function showVariantPicker(id, btn) {
         {key:'20kg', label:'20 kg', kg:20, precioKg: precioKg(prod,20)} ]
     : [ {key:'1kg',  label:'1 kg',  kg:1,  precioKg: prod.precio},
         {key:'5kg',  label:'5 kg',  kg:5,  precioKg: precioKg(prod,5)},
-        {key:'25kg', label:'25 kg', kg:25, precioKg: precioKg(prod,25)} ];
+        esLiquido(prod)
+          ? {key:'20kg', label:'20 kg', kg:20, precioKg: precioKg(prod,20)}
+          : {key:'25kg', label:'25 kg', kg:25, precioKg: precioKg(prod,25)} ];
 
   const existing = document.getElementById('variantPickerDyn');
   if (existing) existing.remove();
@@ -1051,6 +1056,9 @@ function _serializarProductos() {
     if (p.id === 'aditivo-opacante') {
       return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}, descripcion:${desc} }`;
     }
+    if (esLiquido(p)) {
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio5:${precio5}, precio20:${precio20}, descripcion:${desc} }`;
+    }
     if (p.categoria === 'dispersiones') {
       return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio4:${precio4}, precio5:${precio5}, precio20:${precio20}, descripcion:${desc} }`;
     }
@@ -1134,6 +1142,10 @@ function admEditProduct(id) {
     pg.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
     pg.innerHTML = _inp('adm-f-precio','1 kg',p.precio) + _inp('adm-f-precio4','4 kg',p.precio4) + _inp('adm-f-precio5','5 kg',p.precio5) + _inp('adm-f-precio20','20 kg',p.precio20)
       + _stk(p.id+'_1kg','1 kg') + _stk(p.id+'_4kg','4 kg') + _stk(p.id+'_5kg','5 kg') + _stk(p.id+'_20kg','20 kg');
+  } else if (esLiquido(p)) {
+    pg.style.gridTemplateColumns = '1fr 1fr 1fr';
+    pg.innerHTML = _inp('adm-f-precio','1 kg',p.precio) + _inp('adm-f-precio5','5 kg',p.precio5) + _inp('adm-f-precio20','20 kg',p.precio20)
+      + _stk(p.id+'_1kg','1 kg') + _stk(p.id+'_5kg','5 kg') + _stk(p.id+'_20kg','20 kg');
   } else {
     pg.style.gridTemplateColumns = '1fr 1fr 1fr';
     pg.innerHTML = _inp('adm-f-precio','1 kg',p.precio) + _inp('adm-f-precio5','5 kg',p.precio5) + _inp('adm-f-precio25','25 kg',p.precio25)
@@ -1230,6 +1242,8 @@ async function admSaveProduct() {
     ? ['5kg','10kg','20kg','200kg']
     : p.categoria === 'dispersiones'
     ? ['1kg','4kg','5kg','20kg']
+    : esLiquido(p)
+    ? ['1kg','5kg','20kg']
     : ['1kg','5kg','25kg'];
   stockKeys.forEach(k => {
     const cartId = p.id + '_' + k;
