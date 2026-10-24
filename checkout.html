@@ -261,7 +261,7 @@
           <div class="order-summary-foot">
             <div class="order-count" id="orderCount"></div>
             <div id="dolarTotalARS" style="display:none;font-size:13px;color:#15803d;font-weight:700;margin-top:4px;">
-              ≈ <span id="dolarTotalVal"></span> ARS
+              ≈ <span id="dolarTotalVal"></span> ARS + IVA
               <span style="font-size:10px;font-weight:400;color:#6b7280;">(dólar oficial venta)</span>
             </div>
           </div>
@@ -575,11 +575,12 @@
       totalEl.innerHTML = `
         <div class="order-total">
           <div>
-            <div class="order-total-label">${todosConPrecio ? 'Total' : 'Subtotal'}</div>
+            <div class="order-total-label">${todosConPrecio ? 'Total' : 'Subtotal'} <span style="font-weight:500;color:var(--gray-500);">+ IVA</span></div>
             ${!todosConPrecio ? `<div class="order-total-partial">+ ${sinPrecio.length} producto${sinPrecio.length>1?'s':''} a confirmar precio</div>` : ''}
           </div>
           <div class="order-total-value">${fmt(subtotal)}</div>
-        </div>`;
+        </div>
+        <div style="font-size:11px;color:var(--gray-500);text-align:right;margin-top:4px;">Los precios no incluyen IVA.</div>`;
     } else {
       totalEl.innerHTML = '';
     }
@@ -659,8 +660,8 @@
     msg += `*PRODUCTOS:*\n${lineasProd}\n`;
     if (hayTotal) {
       msg += todosTienen
-        ? `\n*TOTAL: ${fmt(subtotal)}*\n\n`
-        : `\n*Subtotal: ${fmt(subtotal)}* (+ productos a confirmar precio)\n\n`;
+        ? `\n*TOTAL: ${fmt(subtotal)} + IVA*\n\n`
+        : `\n*Subtotal: ${fmt(subtotal)} + IVA* (+ productos a confirmar precio)\n\n`;
     } else {
       msg += `\n`;
     }

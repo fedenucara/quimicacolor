@@ -565,7 +565,7 @@ function prodCardHTML(p) {
     <div class="prod-sub">${p.subcategoria}</div>
     <div class="prod-name">${p.nombre}</div>
     <span class="prod-badge ${badgeClass}">${badgeLabel}</span>
-    ${(function(){ const precios = [1, 4, 5, 20, 25].map(kg => precioKg(p, kg)).filter(v => v != null); const min = precios.length ? Math.min(...precios) : null; return min != null ? `<div class="prod-price"><span style="font-size:11px;font-weight:500;color:var(--gray-500)">desde</span> USD ${Number(min).toLocaleString('en-US')} <span style="font-size:11px;font-weight:500;color:var(--gray-500)">/ kg.</span></div>` : `<div class="prod-price-na">Sin disponibilidad publicada</div>`; })()}
+    ${(function(){ const precios = [1, 4, 5, 20, 25].map(kg => precioKg(p, kg)).filter(v => v != null); const min = precios.length ? Math.min(...precios) : null; return min != null ? `<div class="prod-price"><span style="font-size:11px;font-weight:500;color:var(--gray-500)">desde</span> USD ${Number(min).toLocaleString('en-US')} <span style="font-size:11px;font-weight:500;color:var(--gray-500)">/ kg + IVA</span></div>` : `<div class="prod-price-na">Sin disponibilidad publicada</div>`; })()}
     <div class="prod-card-footer">
       <button class="consultar-btn" onclick="event.stopPropagation();openProductDetail('${p.id}')">Ver detalle</button>
       ${addBtn}
@@ -605,7 +605,7 @@ function openProductDetail(id) {
     ? `<img class="pm-img" src="${p.imagen}" alt="${p.nombre}" onerror="this.outerHTML='<div class=pm-img-ph>📷</div>'">`
     : `<div class="pm-img-ph">📷</div>`;
 
-  const fmtP = v => v != null ? `<span class="pm-price-val">USD ${Number(v).toLocaleString('en-US')}</span><span style="font-size:13px;font-weight:400;color:var(--gray-500);margin-left:4px;">/kg</span>` : `<span class="pm-price-consultar">No disponible</span>`;
+  const fmtP = v => v != null ? `<span class="pm-price-val">USD ${Number(v).toLocaleString('en-US')}</span><span style="font-size:13px;font-weight:400;color:var(--gray-500);margin-left:4px;">/kg + IVA</span>` : `<span class="pm-price-consultar">No disponible</span>`;
   const priceHTML = p.categoria === 'dispersiones'
     ? `<div class="pm-prices">
     <div class="pm-price-row"><span class="pm-price-lbl">1 kg</span>${fmtP(p.precio)}</div>
@@ -755,7 +755,7 @@ function showVariantPicker(id, btn) {
       ? `<span style="font-size:10px;color:#15803d;font-weight:600;">● ${stockU} unid. disp.</span>`
       : `<span style="font-size:10px;color:#dc2626;font-weight:600;">● Sin stock</span>`;
     if (total != null && !sinStock) {
-      vBtn.innerHTML = `<div style="line-height:1.5;""><span style="font-weight:700;color:#111827;">${v.label}</span>${prod.sku ? ' <span style="font-size:11px;color:#9ca3af;font-family:ui-monospace,Consolas,monospace;">' + skuEnvase(prod, v.kg) + '</span>' : ''}${stockTag ? '<br>'+stockTag : ''}</div><div style="text-align:right;line-height:1.4;"><div style="font-weight:700;color:#111827;">USD ${Number(total).toLocaleString('en-US')}</div><div style="font-size:11px;color:#9ca3af;">USD ${Number(v.precioKg).toLocaleString('en-US')}/kg</div></div>`;
+      vBtn.innerHTML = `<div style="line-height:1.5;""><span style="font-weight:700;color:#111827;">${v.label}</span>${prod.sku ? ' <span style="font-size:11px;color:#9ca3af;font-family:ui-monospace,Consolas,monospace;">' + skuEnvase(prod, v.kg) + '</span>' : ''}${stockTag ? '<br>'+stockTag : ''}</div><div style="text-align:right;line-height:1.4;"><div style="font-weight:700;color:#111827;">USD ${Number(total).toLocaleString('en-US')}</div><div style="font-size:11px;color:#9ca3af;">USD ${Number(v.precioKg).toLocaleString('en-US')}/kg + IVA</div></div>`;
       vBtn.onmouseenter = () => { vBtn.style.borderColor='#F97316'; vBtn.style.background='#fff7ed'; };
       vBtn.onmouseleave = () => { vBtn.style.borderColor='#e5e7eb'; vBtn.style.background='white'; };
       vBtn.onclick = () => { overlay.remove(); _addVariantToCart(prod, v.key, v.label, v.precioKg, v.kg, btn); };
@@ -875,7 +875,7 @@ function _cartFooterHTML() {
       <a href="checkout.html" style="display:block;text-align:center;padding:14px;background:linear-gradient(135deg,#F97316,#EC4899);color:white;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;opacity:.4;pointer-events:none;">Ver pedido →</a>`;
   }
   const total = carrito.reduce((s,i) => s + i.cantidad, 0);
-  return `<div style="font-size:13px;color:#6b7280;text-align:center;">${total} producto${total!==1?'s':''} en el pedido</div>
+  return `<div style="font-size:13px;color:#6b7280;text-align:center;">${total} producto${total!==1?'s':''} en el pedido · precios + IVA</div>
     <a href="checkout.html" style="display:block;text-align:center;padding:14px;background:linear-gradient(135deg,#F97316,#EC4899);color:white;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;">Continuar con el pedido →</a>`;
 }
 
