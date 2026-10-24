@@ -561,7 +561,7 @@ function prodCardHTML(p) {
     <div class="prod-sub">${p.subcategoria}</div>
     <div class="prod-name">${p.nombre}</div>
     <span class="prod-badge ${badgeClass}">${badgeLabel}</span>
-    ${(function(){ const precios = [p.precio, p.precio4, p.precio5, p.precio20, p.precio25].filter(v => v != null); const min = precios.length ? Math.min(...precios) : null; return min != null ? `<div class="prod-price"><span style="font-size:11px;font-weight:500;color:var(--gray-500)">desde</span> USD ${Number(min).toLocaleString('en-US')} <span style="font-size:11px;font-weight:500;color:var(--gray-500)">/ kg.</span></div>` : `<div class="prod-price-na">Sin disponibilidad publicada</div>`; })()}
+    ${(function(){ const precios = [1, 4, 5, 20, 25].map(kg => precioKg(p, kg)).filter(v => v != null); const min = precios.length ? Math.min(...precios) : null; return min != null ? `<div class="prod-price"><span style="font-size:11px;font-weight:500;color:var(--gray-500)">desde</span> USD ${Number(min).toLocaleString('en-US')} <span style="font-size:11px;font-weight:500;color:var(--gray-500)">/ kg.</span></div>` : `<div class="prod-price-na">Sin disponibilidad publicada</div>`; })()}
     <div class="prod-card-footer">
       <button class="consultar-btn" onclick="event.stopPropagation();openProductDetail('${p.id}')">Ver detalle</button>
       ${addBtn}
@@ -605,14 +605,14 @@ function openProductDetail(id) {
   const priceHTML = p.categoria === 'dispersiones'
     ? `<div class="pm-prices">
     <div class="pm-price-row"><span class="pm-price-lbl">1 kg</span>${fmtP(p.precio)}</div>
-    <div class="pm-price-row"><span class="pm-price-lbl">4 kg</span>${fmtP(p.precio4)}</div>
-    <div class="pm-price-row"><span class="pm-price-lbl">5 kg</span>${fmtP(p.precio5)}</div>
-    <div class="pm-price-row"><span class="pm-price-lbl">20 kg</span>${fmtP(p.precio20)}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">4 kg</span>${fmtP(precioKg(p,4))}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">5 kg</span>${fmtP(precioKg(p,5))}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">20 kg</span>${fmtP(precioKg(p,20))}</div>
   </div>`
     : `<div class="pm-prices">
     <div class="pm-price-row"><span class="pm-price-lbl">1 kg</span>${fmtP(p.precio)}</div>
-    <div class="pm-price-row"><span class="pm-price-lbl">5 kg</span>${fmtP(p.precio5)}</div>
-    <div class="pm-price-row"><span class="pm-price-lbl">25 kg</span>${fmtP(p.precio25)}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">5 kg</span>${fmtP(precioKg(p,5))}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">25 kg</span>${fmtP(precioKg(p,25))}</div>
   </div>`;
 
   const descHTML = p.descripcion
@@ -675,24 +675,34 @@ carrito = carrito.map(({ id, nombre, variante, categoria, subcategoria, precio, 
 function saveCarrito() { localStorage.setItem('qc_carrito', JSON.stringify(carrito)); }
 saveCarrito();
 
+// Regla de precios por volumen: 5% menos desde 5 kg, 10% menos desde 10 kg.
+// Si la ficha tiene ese escalón cargado a mano, manda el de la ficha.
+function precioKg(p, kg) {
+  const k = kg === 1 ? 'precio' : 'precio' + kg;
+  if (p[k] != null) return p[k];
+  if (p.precio == null) return null;
+  const desc = kg >= 10 ? 0.10 : kg >= 5 ? 0.05 : 0;
+  return Math.round(p.precio * (1 - desc) * 100) / 100;
+}
+
 function showVariantPicker(id, btn) {
   const prod = DATOS.find(p => p.id === id);
   if (!prod) return;
 
   // precioKg = precio por kg; total = precioKg × kg
   const variants = prod.id === 'aditivo-opacante'
-    ? [ {key:'5kg',   label:'5 kg',   kg:5,   precioKg: prod.precio5},
-        {key:'10kg',  label:'10 kg',  kg:10,  precioKg: prod.precio10},
-        {key:'20kg',  label:'20 kg',  kg:20,  precioKg: prod.precio20},
-        {key:'200kg', label:'200 kg', kg:200, precioKg: prod.precio200} ]
+    ? [ {key:'5kg',   label:'5 kg',   kg:5,   precioKg: precioKg(prod,5)},
+        {key:'10kg',  label:'10 kg',  kg:10,  precioKg: precioKg(prod,10)},
+        {key:'20kg',  label:'20 kg',  kg:20,  precioKg: precioKg(prod,20)},
+        {key:'200kg', label:'200 kg', kg:200, precioKg: precioKg(prod,200)} ]
     : prod.categoria === 'dispersiones'
     ? [ {key:'1kg',  label:'1 kg',  kg:1,  precioKg: prod.precio},
-        {key:'4kg',  label:'4 kg',  kg:4,  precioKg: prod.precio4},
-        {key:'5kg',  label:'5 kg',  kg:5,  precioKg: prod.precio5},
-        {key:'20kg', label:'20 kg', kg:20, precioKg: prod.precio20} ]
+        {key:'4kg',  label:'4 kg',  kg:4,  precioKg: precioKg(prod,4)},
+        {key:'5kg',  label:'5 kg',  kg:5,  precioKg: precioKg(prod,5)},
+        {key:'20kg', label:'20 kg', kg:20, precioKg: precioKg(prod,20)} ]
     : [ {key:'1kg',  label:'1 kg',  kg:1,  precioKg: prod.precio},
-        {key:'5kg',  label:'5 kg',  kg:5,  precioKg: prod.precio5},
-        {key:'25kg', label:'25 kg', kg:25, precioKg: prod.precio25} ];
+        {key:'5kg',  label:'5 kg',  kg:5,  precioKg: precioKg(prod,5)},
+        {key:'25kg', label:'25 kg', kg:25, precioKg: precioKg(prod,25)} ];
 
   const existing = document.getElementById('variantPickerDyn');
   if (existing) existing.remove();
