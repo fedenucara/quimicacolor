@@ -746,9 +746,12 @@ function showVariantPicker(id, btn) {
     vBtn.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border:1.5px solid #e5e7eb;border-radius:10px;background:white;cursor:pointer;font-size:14px;font-family:inherit;width:100%;';
     const total   = (v.precioKg != null) ? Number(v.precioKg) * v.kg : null;
     const cartId  = prod.id + '_' + v.key;
-    const stockU  = getStock(cartId) ?? 0;  // null = sin stock cargado = 0
-    const sinStock = stockU <= 0;
-    const stockTag = stockU > 0
+    // Unidades por envase: solo existen si se cargaron desde el admin en este navegador.
+    // Si no hay dato (null), manda el estado general del producto (stock / nostock / consultar).
+    const stockU  = getStock(cartId);
+    const sinStock = stockU != null ? stockU <= 0 : prod.stock === 'nostock';
+    const stockTag = stockU == null ? ''
+      : stockU > 0
       ? `<span style="font-size:10px;color:#15803d;font-weight:600;">● ${stockU} unid. disp.</span>`
       : `<span style="font-size:10px;color:#dc2626;font-weight:600;">● Sin stock</span>`;
     if (total != null && !sinStock) {
@@ -769,10 +772,10 @@ function showVariantPicker(id, btn) {
 function _addVariantToCart(prod, varKey, varLabel, precioKg, kg, btn) {
   const precioTotal = (precioKg != null) ? Number(precioKg) * kg : null;
   const cartId = prod.id + '_' + varKey;
-  const stockU    = getStock(cartId) ?? 0;  // null = sin stock cargado = 0
+  const stockU    = getStock(cartId);  // null = sin tope de unidades cargado
   const existing  = carrito.find(i => i.id === cartId);
   const cantActual = existing ? existing.cantidad : 0;
-  if ((cantActual + 1) > stockU) {
+  if (stockU != null && (cantActual + 1) > stockU) {
     _showCartError(`Sin stock suficiente: quedan ${stockU} unidad/es de ${prod.nombre} (${varLabel}).`);
     return;
   }
@@ -796,8 +799,8 @@ function changeQty(id, delta) {
   const item = carrito.find(i => i.id === id);
   if (!item) return;
   if (delta > 0) {
-    const stockU = getStock(id) ?? 0;  // null = sin stock cargado = 0
-    if ((item.cantidad + 1) > stockU) {
+    const stockU = getStock(id);  // null = sin tope de unidades cargado
+    if (stockU != null && (item.cantidad + 1) > stockU) {
       _showCartError(`Sin stock suficiente: quedan ${stockU} unidad/es de ${item.nombre} (${item.variante}).`);
       return;
     }
