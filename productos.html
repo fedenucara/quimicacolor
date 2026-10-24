@@ -532,9 +532,12 @@ function renderCatalog() {
         <h2>${meta.label}</h2>
         <span class="cat-title-count">${total} productos</span>
       </div>`;
-    for (const [sub, prods] of Object.entries(subs)) {
+    // Orden fijo de las familias; las que no están en la lista van al final, en orden de aparición
+    const SUB_ORDER = { colorantes:['Ácidos','Reactivos','Básicos','A la Grasa','Directos'], dispersiones:['Dispersión','Fluorescente'], pigmentos:['Orgánico / Inorgánico','Inorgánico','Fosforescente','Perlado','Fluorescente'], aditivos:['Aditivo'] }[cat] || [];
+    const subsOrdenadas = Object.entries(subs).sort(([a],[b]) => { const ia = SUB_ORDER.indexOf(a), ib = SUB_ORDER.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
+    for (const [sub, prods] of subsOrdenadas) {
       html += `<div class="subcat"><div class="subcat-label">${sub}</div><div class="prod-grid">`;
-      prods.sort((a,b) => a.nombre.localeCompare(b.nombre, 'es')).forEach(p => { html += prodCardHTML(p); });
+      prods.sort((a,b) => (esLiquido(a)?1:0) - (esLiquido(b)?1:0) || a.nombre.localeCompare(b.nombre, 'es')).forEach(p => { html += prodCardHTML(p); });
       html += `</div></div>`;
     }
     html += `</div>`;
