@@ -275,6 +275,9 @@
     .pm-sub { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .pm-name { font-size: 22px; font-weight: 900; color: var(--gray-900); line-height: 1.2; }
     .pm-desc { font-size: 14px; color: var(--gray-500); line-height: 1.65; white-space: pre-wrap; }
+    .pm-fichas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .pm-ficha { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--gray-700); background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 8px; padding: 7px 12px; text-decoration: none; }
+    .pm-ficha:hover { border-color: var(--gray-400); background: #fff; }
     .pm-prices { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
     .pm-price-row { display: flex; align-items: baseline; gap: 10px; }
     .pm-price-lbl { font-size: 13px; color: var(--gray-500); font-weight: 600; min-width: 48px; }
@@ -619,6 +622,10 @@ function openProductDetail(id) {
     ? `<div class="pm-desc">${p.descripcion.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`
     : '';
 
+  const fichasHTML = (p.fichas && p.fichas.length)
+    ? `<div class="pm-fichas">${p.fichas.map(f => `<a class="pm-ficha" href="${f.a}" target="_blank" rel="noopener">📄 Ficha técnica${p.fichas.length > 1 ? ' · ' + f.t : ''}</a>`).join('')}</div>`
+    : '';
+
   const addBtnHTML = p.stock !== 'nostock'
     ? `<button class="pm-add" id="pm-add-btn" onclick="addToCartFromModal('${p.id}')">+ Agregar al carrito</button>`
     : `<div class="pm-nostock">Sin stock actualmente</div>`;
@@ -638,6 +645,7 @@ function openProductDetail(id) {
           <div class="pm-name">${p.nombre}</div>
           ${descHTML}
           ${priceHTML}
+          ${fichasHTML}
           <div class="pm-actions">
             <button class="pm-wa" onclick="cotizar('${safeName}')">💬 Consultar por WhatsApp</button>
             ${addBtnHTML}
@@ -1053,16 +1061,17 @@ function _serializarProductos() {
     const precio25 = p.precio25  != null ? p.precio25  : 'null';
     const precio200= p.precio200 != null ? p.precio200 : 'null';
     const desc    = p.descripcion ? `"${p.descripcion.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')}"` : 'null';
+    const fichas  = (p.fichas && p.fichas.length) ? `, fichas:${JSON.stringify(p.fichas)}` : '';
     if (p.id === 'aditivo-opacante') {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}${fichas}, descripcion:${desc} }`;
     }
     if (esLiquido(p)) {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio5:${precio5}, precio20:${precio20}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
     }
     if (p.categoria === 'dispersiones') {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio4:${precio4}, precio5:${precio5}, precio20:${precio20}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio4:${precio4}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
     }
-    return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio5:${precio5}, precio25:${precio25}, descripcion:${desc} }`;
+    return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio5:${precio5}, precio25:${precio25}${fichas}, descripcion:${desc} }`;
   });
 }
 
