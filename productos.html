@@ -274,6 +274,7 @@
     .pm-badge-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .pm-sub { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .pm-name { font-size: 22px; font-weight: 900; color: var(--gray-900); line-height: 1.2; }
+    .pm-sku { font-size: 12px; font-weight: 600; color: var(--gray-500); font-family: ui-monospace, Consolas, monospace; letter-spacing: .3px; }
     .pm-desc { font-size: 14px; color: var(--gray-500); line-height: 1.65; white-space: pre-wrap; }
     .pm-fichas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
     .pm-ficha { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--gray-700); background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 8px; padding: 7px 12px; text-decoration: none; }
@@ -643,6 +644,7 @@ function openProductDetail(id) {
             <span class="pm-sub" style="color:${cc}">${p.subcategoria}</span>
           </div>
           <div class="pm-name">${p.nombre}</div>
+          ${p.sku ? `<div class="pm-sku">Código ${p.sku}${p.skuVsl ? ' · en vaselina ' + p.skuVsl : ''}</div>` : ''}
           ${descHTML}
           ${priceHTML}
           ${fichasHTML}
@@ -684,6 +686,9 @@ function saveCarrito() { localStorage.setItem('qc_carrito', JSON.stringify(carri
 saveCarrito();
 
 // Los colorantes de la subcategoría "Otros" son líquidos: el envase más grande es de 20 kg (no 25).
+// SKU de un envase: código de producto + kilos en dos cifras (CA-AMA-01-05 = 5 kg)
+function skuEnvase(p, kg) { return p.sku ? p.sku + '-' + String(kg).padStart(2, '0') : ''; }
+
 function esLiquido(p) { return p.categoria === 'colorantes' && p.subcategoria === 'Otros'; }
 
 // Regla de precios por volumen: 5% menos desde 5 kg, 10% menos desde 10 kg.
@@ -747,7 +752,7 @@ function showVariantPicker(id, btn) {
       ? `<span style="font-size:10px;color:#15803d;font-weight:600;">● ${stockU} unid. disp.</span>`
       : `<span style="font-size:10px;color:#dc2626;font-weight:600;">● Sin stock</span>`;
     if (total != null && !sinStock) {
-      vBtn.innerHTML = `<div style="line-height:1.5;""><span style="font-weight:700;color:#111827;">${v.label}</span>${stockTag ? '<br>'+stockTag : ''}</div><div style="text-align:right;line-height:1.4;"><div style="font-weight:700;color:#111827;">USD ${Number(total).toLocaleString('en-US')}</div><div style="font-size:11px;color:#9ca3af;">USD ${Number(v.precioKg).toLocaleString('en-US')}/kg</div></div>`;
+      vBtn.innerHTML = `<div style="line-height:1.5;""><span style="font-weight:700;color:#111827;">${v.label}</span>${prod.sku ? ' <span style="font-size:11px;color:#9ca3af;font-family:ui-monospace,Consolas,monospace;">' + skuEnvase(prod, v.kg) + '</span>' : ''}${stockTag ? '<br>'+stockTag : ''}</div><div style="text-align:right;line-height:1.4;"><div style="font-weight:700;color:#111827;">USD ${Number(total).toLocaleString('en-US')}</div><div style="font-size:11px;color:#9ca3af;">USD ${Number(v.precioKg).toLocaleString('en-US')}/kg</div></div>`;
       vBtn.onmouseenter = () => { vBtn.style.borderColor='#F97316'; vBtn.style.background='#fff7ed'; };
       vBtn.onmouseleave = () => { vBtn.style.borderColor='#e5e7eb'; vBtn.style.background='white'; };
       vBtn.onclick = () => { overlay.remove(); _addVariantToCart(prod, v.key, v.label, v.precioKg, v.kg, btn); };
@@ -1062,16 +1067,17 @@ function _serializarProductos() {
     const precio200= p.precio200 != null ? p.precio200 : 'null';
     const desc    = p.descripcion ? `"${p.descripcion.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')}"` : 'null';
     const fichas  = (p.fichas && p.fichas.length) ? `, fichas:${JSON.stringify(p.fichas)}` : '';
+    const sku     = (p.sku ? `, sku:"${p.sku}"` : '') + (p.skuVsl ? `, skuVsl:"${p.skuVsl}"` : '');
     if (p.id === 'aditivo-opacante') {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}${fichas}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}${fichas}, descripcion:${desc} }`;
     }
     if (esLiquido(p)) {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio:${precio}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
     }
     if (p.categoria === 'dispersiones') {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio4:${precio4}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio:${precio}, precio4:${precio4}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
     }
-    return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio5:${precio5}, precio25:${precio25}${fichas}, descripcion:${desc} }`;
+    return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio:${precio}, precio5:${precio5}, precio25:${precio25}${fichas}, descripcion:${desc} }`;
   });
 }
 
