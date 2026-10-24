@@ -1,0 +1,1418 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo de Productos | Química Color</title>
+  <meta name="description" content="Catálogo completo de colorantes, pigmentos, dispersiones y aditivos. Más de 90 productos para la industria argentina." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="productos-data.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --p-disp:   #F97316;
+      --p-pig:    #8B5CF6;
+      --p-col:    #EC4899;
+      --p-adi:    #14B8A6;
+      --gray-900: #0F172A;
+      --gray-700: #334155;
+      --gray-500: #64748B;
+      --gray-200: #E2E8F0;
+      --gray-50:  #F8FAFC;
+      --white:    #FFFFFF;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Exo 2', sans-serif; color: var(--gray-700); background: var(--gray-50); }
+    a { text-decoration: none; color: inherit; }
+
+    .spectrum { height: 5px; background: linear-gradient(90deg,#CC2222,#E85A1A,#F5A800,#2A8A3E,#1A7A6E,#1A4E9A); }
+
+    header {
+      background: var(--white); border-bottom: 1px solid var(--gray-200);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .nav-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 24px;
+      height: 80px; display: flex; align-items: center;
+      justify-content: space-between; gap: 24px;
+    }
+    .logo { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+    .logo img { height: 62px; width: auto; object-fit: contain; }
+    nav { display: flex; gap: 4px; align-items: center; }
+    nav a { padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--gray-700); transition: background .15s; }
+    nav a:hover { background: var(--gray-50); color: var(--gray-900); }
+    .btn-cta {
+      background: linear-gradient(135deg,#F97316,#EC4899); color: white;
+      padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 700;
+      box-shadow: 0 4px 14px rgba(249,115,22,.3); transition: all .2s; margin-left: 8px;
+    }
+    .btn-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(249,115,22,.4); }
+
+    .cat-hero {
+      background: var(--gray-900); padding: 56px 24px 48px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cat-hero::before {
+      content:''; position:absolute; width:500px; height:500px; border-radius:50%;
+      background: radial-gradient(circle,rgba(249,115,22,.25) 0%,transparent 70%);
+      top:-150px; left:-100px; pointer-events:none;
+    }
+    .cat-hero::after {
+      content:''; position:absolute; width:400px; height:400px; border-radius:50%;
+      background: radial-gradient(circle,rgba(139,92,246,.2) 0%,transparent 70%);
+      bottom:-100px; right:5%; pointer-events:none;
+    }
+    .cat-hero-inner { position:relative; z-index:1; }
+    .cat-hero h1 { font-size: clamp(28px,4vw,44px); font-weight:900; color:white; letter-spacing:-1px; margin-bottom:10px; }
+    .cat-hero h1 span { background:linear-gradient(135deg,#FDBA74,#F472B6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .cat-hero p { font-size:16px; color:#94A3B8; max-width:500px; margin:0 auto 28px; }
+    .cat-stats { display:flex; gap:32px; justify-content:center; flex-wrap:wrap; }
+    .cat-stat { text-align:center; }
+    .cat-stat-n { font-size:28px; font-weight:900; line-height:1; margin-bottom:3px; }
+    .cat-stat-l { font-size:12px; color:#64748B; font-weight:500; }
+
+    .filter-bar {
+      background: var(--white); border-bottom: 1px solid var(--gray-200);
+      position: sticky; top: 80px; z-index: 90;
+    }
+    .filter-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 24px;
+      display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none;
+    }
+    .filter-inner::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      padding: 14px 20px; border: none; background: none;
+      font-family: 'Exo 2', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--gray-500); cursor: pointer; white-space: nowrap;
+      border-bottom: 3px solid transparent; transition: all .15s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .filter-btn:hover { color: var(--gray-900); }
+    .filter-btn.active { color: var(--gray-900); border-bottom-color: currentColor; }
+    .filter-btn.f-all.active   { color: var(--gray-900); }
+    .filter-btn.f-disp.active  { color: var(--p-disp); }
+    .filter-btn.f-pig.active   { color: var(--p-pig); }
+    .filter-btn.f-col.active   { color: var(--p-col); }
+    .filter-btn.f-adi.active   { color: var(--p-adi); }
+    .filter-dot { width:8px; height:8px; border-radius:50%; }
+
+    .main { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    .cat-block { margin-bottom: 56px; }
+    .cat-block[data-cat="dispersiones"]  { --cc: var(--p-disp); }
+    .cat-block[data-cat="pigmentos"]     { --cc: var(--p-pig); }
+    .cat-block[data-cat="colorantes"]    { --cc: var(--p-col); }
+    .cat-block[data-cat="aditivos"]      { --cc: var(--p-adi); }
+
+    .cat-title {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 24px; padding-bottom: 14px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+    .cat-title-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+      background: color-mix(in srgb, var(--cc) 12%, white);
+    }
+    .cat-title h2 { font-size: 22px; font-weight: 800; color: var(--gray-900); }
+    .cat-title-count {
+      margin-left: auto;
+      background: color-mix(in srgb, var(--cc) 12%, white);
+      color: var(--cc); font-size: 12px; font-weight: 700;
+      padding: 4px 12px; border-radius: 20px;
+    }
+
+    .subcat { margin-bottom: 28px; }
+    .subcat-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--cc);
+      margin-bottom: 12px; padding-left: 2px;
+    }
+
+    .prod-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .prod-card {
+      background: var(--white); border: 1.5px solid var(--gray-200);
+      border-radius: 10px; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      transition: border-color .15s, box-shadow .15s, transform .15s;
+      cursor: pointer;
+    }
+    .prod-card:hover {
+      border-color: var(--cc);
+      box-shadow: 0 4px 16px color-mix(in srgb, var(--cc) 18%, transparent);
+      transform: translateY(-2px);
+    }
+    .prod-card.sin-stock { opacity: .55; }
+    .prod-card.sin-stock:hover { transform: none; }
+    .prod-name { font-size: 14px; font-weight: 700; color: var(--gray-900); line-height: 1.3; }
+    .prod-sub { font-size: 11px; font-weight: 600; color: var(--cc); text-transform: uppercase; letter-spacing: .8px; }
+    .prod-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; align-self: flex-start; }
+    .badge-stock   { background: #F0FDF4; color: #16A34A; }
+    .badge-nostock { background: #FEF2F2; color: #DC2626; }
+    .badge-consultar { background: #F0FDFA; color: #0F766E; }
+    .prod-card-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: auto; padding-top: 8px; border-top: 1px solid var(--gray-200);
+    }
+    .consultar-btn {
+      font-size: 12px; font-weight: 700; color: var(--cc);
+      background: color-mix(in srgb, var(--cc) 10%, white);
+      border: none; border-radius: 6px; padding: 5px 12px;
+      cursor: pointer; font-family: inherit; transition: background .15s;
+    }
+    .consultar-btn:hover { background: color-mix(in srgb, var(--cc) 20%, white); }
+
+    .prod-img {
+      width: 100%; height: 150px; object-fit: contain; object-position: center;
+      border-radius: 8px; margin-bottom: 4px;
+      background: #fff; display: block;
+    }
+    .prod-img-placeholder {
+      width: 100%; height: 150px; border-radius: 8px; margin-bottom: 4px;
+      background: linear-gradient(135deg, var(--gray-50), var(--gray-200));
+      display: flex; align-items: center; justify-content: center; font-size: 36px;
+    }
+
+    .prod-price {
+      font-size: 16px; font-weight: 900; color: var(--gray-900);
+      letter-spacing: -.3px;
+    }
+    .prod-price-na { font-size: 12px; color: var(--gray-500); font-style: italic; }
+
+    .cat-block.hidden { display: none; }
+
+    .cta-bottom {
+      background: linear-gradient(135deg,#0F172A,#1E1B4B);
+      border-radius: 16px; padding: 48px 40px;
+      text-align: center; color: white; margin-top: 48px;
+    }
+    .cta-bottom h2 { font-size: 28px; font-weight: 900; margin-bottom: 10px; letter-spacing: -.5px; }
+    .cta-bottom p { font-size: 15px; color: #94A3B8; margin-bottom: 28px; }
+    .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-wa {
+      background: #22C55E; color: white; padding: 13px 28px;
+      border-radius: 10px; font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px; transition: all .2s;
+    }
+    .btn-wa:hover { background: #16A34A; transform: translateY(-1px); }
+    .btn-mail {
+      background: rgba(255,255,255,.1); color: white; padding: 13px 28px;
+      border-radius: 10px; font-size: 15px; font-weight: 700;
+      border: 1.5px solid rgba(255,255,255,.25); transition: all .2s;
+    }
+    .btn-mail:hover { background: rgba(255,255,255,.18); }
+
+    @media (max-width: 600px) {
+      nav a:not(.btn-cta) { display: none; }
+      .prod-grid { grid-template-columns: repeat(2, 1fr); }
+      .cta-bottom { padding: 32px 20px; }
+    }
+
+    /* ── CARRITO ─────────────────────────────────────────────────────────────── */
+    .cart-btn {
+      position: relative; background: none; border: none;
+      width: 40px; height: 40px; border-radius: 10px; cursor: pointer;
+      font-size: 20px; display: flex; align-items: center; justify-content: center;
+      transition: background .15s; margin-left: 4px; flex-shrink: 0;
+    }
+    .cart-btn:hover { background: var(--gray-50); }
+    .cart-badge {
+      position: absolute; top: 4px; right: 3px;
+      background: #EC4899; color: white; font-size: 9px; font-weight: 800;
+      min-width: 16px; height: 16px; border-radius: 8px; padding: 0 3px;
+      display: none; align-items: center; justify-content: center;
+    }
+    .cart-badge.visible { display: flex; }
+    .add-btn {
+      font-size: 11px; font-weight: 700; padding: 5px 10px;
+      background: var(--gray-900); color: white; border: none; border-radius: 6px;
+      cursor: pointer; font-family: inherit; transition: all .15s; white-space: nowrap;
+    }
+    .add-btn:hover { background: var(--gray-700); }
+    .add-btn.added { background: #16A34A; }
+
+    /* ── MODAL DETALLE PRODUCTO ──────────────────────────────────────────────── */
+    #prod-modal {
+      position: fixed; inset: 0; z-index: 800;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+      display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    #prod-modal.open { display: flex; }
+    .pm-card {
+      background: white; border-radius: 18px; width: 100%; max-width: 680px;
+      max-height: 90vh; overflow: hidden;
+      box-shadow: 0 28px 64px rgba(0,0,0,.3);
+      position: relative; display: flex; flex-direction: column;
+    }
+    .pm-close {
+      position: absolute; top: 12px; right: 12px; z-index: 20;
+      background: rgba(255,255,255,.92); backdrop-filter: blur(4px);
+      border: none; border-radius: 50%; width: 34px; height: 34px;
+      font-size: 16px; cursor: pointer; color: var(--gray-700);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,.12); transition: all .15s;
+    }
+    .pm-close:hover { background: white; transform: scale(1.08); }
+    .pm-body { display: grid; grid-template-columns: 260px 1fr; flex: 1; min-height: 0; }
+    .pm-img-col {
+      background: var(--gray-100); border-radius: 18px 0 0 18px; overflow: hidden;
+    }
+    .pm-img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 12px; box-sizing: border-box; }
+    .pm-img-ph {
+      width: 100%; height: 100%; min-height: 320px;
+      display: flex; align-items: center; justify-content: center; font-size: 64px;
+    }
+    .pm-info { padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+    .pm-badge-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pm-sub { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .pm-name { font-size: 22px; font-weight: 900; color: var(--gray-900); line-height: 1.2; }
+    .pm-desc { font-size: 14px; color: var(--gray-500); line-height: 1.65; white-space: pre-wrap; }
+    .pm-prices { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+    .pm-price-row { display: flex; align-items: baseline; gap: 10px; }
+    .pm-price-lbl { font-size: 13px; color: var(--gray-500); font-weight: 600; min-width: 48px; }
+    .pm-price-val { font-size: 20px; font-weight: 900; color: var(--gray-900); }
+    .pm-price-consultar { font-size: 13px; color: var(--gray-400); font-weight: 400; font-style: italic; }
+    .pm-actions { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--gray-200); }
+    .pm-wa { background: #22C55E; color: white; padding: 12px; border-radius: 9px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s; }
+    .pm-wa:hover { background: #16A34A; }
+    .pm-add { background: var(--gray-900); color: white; padding: 11px; border-radius: 9px; font-size: 14px; font-weight: 700; border: none; cursor: pointer; font-family: inherit; transition: background .15s; }
+    .pm-add:hover { background: var(--gray-700); }
+    .pm-add.added { background: #16A34A; }
+    .pm-nostock { background: var(--gray-100); color: var(--gray-400); padding: 11px; border-radius: 9px; font-size: 13px; font-weight: 700; text-align: center; }
+    @media (max-width: 580px) {
+      .pm-body { grid-template-columns: 1fr; }
+      .pm-img-col { border-radius: 18px 18px 0 0; }
+      .pm-img { aspect-ratio: 4/3; height: auto; }
+      .pm-img-ph { min-height: 180px; aspect-ratio: 4/3; height: auto; }
+    }
+
+    /* ── ADMIN MODE ──────────────────────────────────────────────────────────── */
+    .admin-trigger {
+      position: fixed; bottom: 88px; right: 20px; z-index: 130;
+      background: rgba(15,23,42,.7); color: #94A3B8; border: none;
+      width: 36px; height: 36px; border-radius: 50%;
+      font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all .2s; backdrop-filter: blur(4px);
+    }
+    .admin-trigger:hover { background: rgba(15,23,42,.95); color: white; transform: rotate(30deg); }
+
+    /* Login overlay */
+    #adm-login { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.7); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
+    #adm-login.open { display: flex; }
+    .adm-login-card { background: #1E293B; border: 1.5px solid #334155; border-radius: 18px; padding: 40px 36px; width: 100%; max-width: 380px; box-shadow: 0 24px 64px rgba(0,0,0,.7); }
+    .adm-login-logo { text-align: center; margin-bottom: 20px; }
+    .adm-login-logo img { height: 54px; width: auto; object-fit: contain; }
+    .adm-login-title { font-size: 18px; font-weight: 900; color: white; text-align: center; margin-bottom: 4px; }
+    .adm-login-sub { font-size: 13px; color: #64748B; text-align: center; margin-bottom: 28px; }
+    .adm-f { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .adm-f label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #64748B; }
+    .adm-f input { width: 100%; background: #0F172A; border: 1.5px solid #334155; color: #E2E8F0; border-radius: 8px; padding: 11px 14px; font-size: 15px; font-family: inherit; outline: none; transition: border-color .15s; }
+    .adm-f input:focus { border-color: #F97316; }
+    .adm-submit { width: 100%; padding: 13px; background: linear-gradient(135deg,#F97316,#EC4899); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 800; font-family: inherit; cursor: pointer; transition: all .2s; margin-top: 4px; }
+    .adm-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(249,115,22,.4); }
+    .adm-err { font-size: 12px; color: #F87171; text-align: center; margin-top: 12px; display: none; }
+    .adm-err.show { display: block; }
+    .adm-cancel { width: 100%; padding: 9px; margin-top: 6px; background: none; border: none; color: #64748B; cursor: pointer; font-size: 13px; font-family: inherit; }
+    .adm-cancel:hover { color: #94A3B8; }
+
+    /* Admin bar (bottom) */
+    #adm-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; background: #0F172A; border-top: 1.5px solid #334155; padding: 10px 20px; display: none; align-items: center; gap: 10px; flex-wrap: wrap; }
+    #adm-bar.open { display: flex; }
+    .adm-bar-tag { font-size: 13px; font-weight: 900; color: #F97316; margin-right: 4px; }
+    .adm-bar-info { font-size: 12px; color: #64748B; flex: 1; }
+    .adm-bar-btn { padding: 7px 16px; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; border: 1.5px solid #334155; background: #1E293B; color: #E2E8F0; transition: all .15s; white-space: nowrap; }
+    .adm-bar-btn:hover { border-color: #F97316; color: #F97316; }
+    .adm-bar-btn.save { background: linear-gradient(135deg,#F97316,#EC4899); color: white; border: none; box-shadow: 0 4px 14px rgba(249,115,22,.3); }
+    .adm-bar-btn.save:hover { transform: translateY(-1px); border: none; }
+    .adm-bar-btn.save:disabled { opacity: .4; cursor: default; transform: none; }
+    .adm-bar-btn.logout { color: #F87171; border-color: rgba(248,113,113,.4); }
+    .adm-bar-btn.logout:hover { background: rgba(248,113,113,.1); color: #F87171; }
+    body.admin-mode { padding-bottom: 58px; }
+
+    /* Edit overlay on cards */
+    .prod-card { position: relative; }
+    .adm-card-btn { position: absolute; top: 7px; right: 7px; z-index: 10; background: rgba(15,23,42,.88); color: white; border: none; border-radius: 6px; padding: 4px 9px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; display: none; transition: background .15s; }
+    body.admin-mode .adm-card-btn { display: block; }
+    .adm-card-btn:hover { background: #F97316; }
+
+    /* Product edit modal */
+    #adm-modal { position: fixed; inset: 0; z-index: 1500; background: rgba(0,0,0,.7); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; padding: 20px; }
+    #adm-modal.open { display: flex; }
+    .adm-modal { background: #1E293B; border: 1px solid #334155; border-radius: 16px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,.7); }
+    .adm-modal-head { padding: 18px 22px; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; }
+    .adm-modal-title { font-size: 16px; font-weight: 800; color: white; }
+    .adm-modal-close { background: none; border: none; color: #64748B; font-size: 22px; cursor: pointer; padding: 2px 7px; border-radius: 6px; line-height: 1; }
+    .adm-modal-close:hover { color: white; background: #334155; }
+    .adm-modal-body { padding: 22px; display: grid; grid-template-columns: 160px 1fr; gap: 20px; }
+    @media (max-width: 500px) { .adm-modal-body { grid-template-columns: 1fr; } }
+    .adm-img-zone { border: 2px dashed #334155; border-radius: 10px; height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color .15s; position: relative; overflow: hidden; background: #0F172A; text-align: center; }
+    .adm-img-zone:hover { border-color: #F97316; background: rgba(249,115,22,.04); }
+    .adm-img-zone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+    .adm-img-lbl { font-size: 11px; color: #64748B; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+    .adm-img-lbl span { font-size: 28px; }
+    .adm-img-rm { font-size: 11px; font-weight: 700; color: #F87171; background: none; border: none; cursor: pointer; font-family: inherit; margin-top: 8px; }
+    .adm-form { display: flex; flex-direction: column; gap: 14px; }
+    .adm-form label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #64748B; margin-bottom: 5px; }
+    .adm-form input, .adm-form select, .adm-form textarea { width: 100%; background: #0F172A; border: 1.5px solid #334155; color: #E2E8F0; border-radius: 8px; padding: 9px 12px; font-size: 14px; font-family: inherit; outline: none; transition: border-color .15s; }
+    .adm-form input:focus, .adm-form select:focus, .adm-form textarea:focus { border-color: #F97316; }
+    .adm-form textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+    .adm-form select option { background: #1E293B; }
+    .adm-stock-row { display: flex; gap: 6px; }
+    .adm-st { flex: 1; padding: 8px 4px; border: 1.5px solid #334155; background: #0F172A; color: #64748B; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: center; transition: all .15s; }
+    .adm-st.s-stock    { border-color: #4ADE80; background: rgba(74,222,128,.1); color: #4ADE80; }
+    .adm-st.s-nostock  { border-color: #F87171; background: rgba(248,113,113,.1); color: #F87171; }
+    .adm-st.s-consultar{ border-color: #14B8A6; background: rgba(20,184,166,.1); color: #14B8A6; }
+    .adm-modal-foot { padding: 16px 22px; border-top: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .adm-del { background: rgba(248,113,113,.1); color: #F87171; border: 1.5px solid #F87171; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .adm-del:hover { background: rgba(248,113,113,.2); }
+    .adm-sec { background: #0F172A; border: 1.5px solid #334155; color: #E2E8F0; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .adm-pri { background: linear-gradient(135deg,#F97316,#EC4899); color: white; border: none; border-radius: 8px; padding: 9px 22px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  </style>
+</head>
+<body>
+
+<div class="spectrum"></div>
+
+<header>
+  <div class="nav-inner">
+    <div class="logo"><img src="logo.webp" alt="Química Color" /></div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="#" style="color:#F97316; font-weight:700;">Productos</a>
+      <a href="index.html#aplicaciones">Aplicaciones</a>
+      <a href="index.html#nosotros">Nosotros</a>
+      <a href="productos.html" class="btn-cta">Tienda online</a>
+      <button class="cart-btn" onclick="openCart()" title="Ver carrito">
+        🛒
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="cat-hero">
+  <div class="cat-hero-inner">
+    <h1>Catálogo de <span>Productos</span></h1>
+    <p>Más de 90 productos distribuidos en 4 líneas. Consultá disponibilidad y precios actualizados.</p>
+    <div class="cat-stats" id="hero-stats"></div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-inner">
+    <button class="filter-btn f-all active" onclick="filtrar('all',this)">Todos los productos</button>
+    <button class="filter-btn f-disp" onclick="filtrar('dispersiones',this)"><span class="filter-dot" style="background:#F97316;"></span>Dispersiones</button>
+    <button class="filter-btn f-pig"  onclick="filtrar('pigmentos',this)"><span class="filter-dot" style="background:#8B5CF6;"></span>Pigmentos</button>
+    <button class="filter-btn f-col"  onclick="filtrar('colorantes',this)"><span class="filter-btn" onclick="filtrar('colorantes',this)"></span><span class="filter-dot" style="background:#EC4899;"></span>Colorantes</button>
+    <button class="filter-btn f-adi"  onclick="filtrar('aditivos',this)"><span class="filter-dot" style="background:#14B8A6;"></span>Aditivos</button>
+  </div>
+</div>
+
+<div class="main" id="catalogo"></div>
+
+<div class="main" style="padding-top:0;">
+  <div class="cta-bottom">
+    <h2>¿Encontraste lo que buscabas?</h2>
+    <p>Pedinos cotización por WhatsApp o email — respondemos en menos de 24 horas hábiles.</p>
+    <div class="cta-btns">
+      <a href="https://wa.me/5491137608638" class="btn-wa"><span>💬</span> WhatsApp</a>
+      <a href="mailto:info@quimicacolor.com.ar" class="btn-mail">✉️ info@quimicacolor.com.ar</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const CAT_META = {
+  colorantes:   { icon:'🧪', label:'Colorantes',            color:'var(--p-col)',  statColor:'#EC4899' },
+  dispersiones: { icon:'🎨', label:'Dispersiones de Pigmentos', color:'var(--p-disp)', statColor:'#F97316' },
+  pigmentos:    { icon:'🔬', label:'Pigmentos',              color:'var(--p-pig)',  statColor:'#8B5CF6' },
+  aditivos:     { icon:'⚗️', label:'Aditivos',               color:'var(--p-adi)', statColor:'#14B8A6' },
+};
+const CAT_ORDER = ['colorantes','dispersiones','pigmentos','aditivos'];
+
+// ── DATOS DE TRABAJO ──────────────────────────────────────────────────────────
+const QC_LOCAL_KEY   = 'qc_productos_local';
+const QC_STOCK_KEY   = 'qc_stock';
+
+function _stockData() {
+  try { return JSON.parse(localStorage.getItem(QC_STOCK_KEY)) || {}; } catch(e) { return {}; }
+}
+function getStock(cartId) {
+  const s = _stockData()[cartId];
+  return (s === undefined || s === null) ? null : Number(s);
+}
+function setStock(cartId, qty) {
+  const s = _stockData();
+  s[cartId] = qty;
+  localStorage.setItem(QC_STOCK_KEY, JSON.stringify(s));
+}
+function deductStock(cartId, qty) {
+  const cur = getStock(cartId);
+  if (cur === null) return;
+  setStock(cartId, Math.max(0, cur - qty));
+}
+let DATOS;
+let _datosDesdeLocal = false;
+(function() {
+  try {
+    const raw = localStorage.getItem(QC_LOCAL_KEY);
+    if (raw) {
+      // Si el dato guardado tiene imágenes base64 (archivo viejo), descartarlo
+      if (raw.includes('"data:image')) {
+        localStorage.removeItem(QC_LOCAL_KEY);
+      } else {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length) {
+          DATOS = parsed;
+          _datosDesdeLocal = true;
+        }
+      }
+    }
+  } catch(e) { localStorage.removeItem(QC_LOCAL_KEY); }
+  if (!DATOS) {
+    DATOS = PRODUCTOS_DATA.map(p => Object.assign({}, p));
+  } else {
+    // Agregar productos nuevos del archivo que no estén en localStorage
+    let cambios = false;
+    PRODUCTOS_DATA.forEach(p => {
+      if (!DATOS.find(d => d.id === p.id)) {
+        DATOS.push(Object.assign({}, p));
+        cambios = true;
+      }
+    });
+    if (cambios) localStorage.setItem(QC_LOCAL_KEY, JSON.stringify(DATOS));
+  }
+})();
+
+// ── HERO STATS ────────────────────────────────────────────────────────────────
+(function() {
+  const counts = {};
+  DATOS.forEach(p => { counts[p.categoria] = (counts[p.categoria]||0) + 1; });
+  const stats = document.getElementById('hero-stats');
+  CAT_ORDER.forEach(cat => {
+    const n = counts[cat] || 0;
+    const m = CAT_META[cat];
+    stats.innerHTML += `<div class="cat-stat">
+      <div class="cat-stat-n" style="color:${m.statColor};">${n}</div>
+      <div class="cat-stat-l">${m.label.split(' ')[0]}</div>
+    </div>`;
+  });
+})();
+
+// ── RENDER CATALOG ────────────────────────────────────────────────────────────
+function renderCatalog() {
+  const byCat = {};
+  CAT_ORDER.forEach(c => { byCat[c] = {}; });
+  DATOS.forEach(p => {
+    if (!byCat[p.categoria]) byCat[p.categoria] = {};
+    if (!byCat[p.categoria][p.subcategoria]) byCat[p.categoria][p.subcategoria] = [];
+    byCat[p.categoria][p.subcategoria].push(p);
+  });
+
+  let html = '';
+  CAT_ORDER.forEach(cat => {
+    const subs = byCat[cat];
+    const meta = CAT_META[cat];
+    const total = Object.values(subs).reduce((s, a) => s + a.length, 0);
+    html += `<div class="cat-block" data-cat="${cat}">
+      <div class="cat-title">
+        <div class="cat-title-icon">${meta.icon}</div>
+        <h2>${meta.label}</h2>
+        <span class="cat-title-count">${total} productos</span>
+      </div>`;
+    for (const [sub, prods] of Object.entries(subs)) {
+      html += `<div class="subcat"><div class="subcat-label">${sub}</div><div class="prod-grid">`;
+      prods.sort((a,b) => a.nombre.localeCompare(b.nombre, 'es')).forEach(p => { html += prodCardHTML(p); });
+      html += `</div></div>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('catalogo').innerHTML = html;
+}
+
+function prodCardHTML(p) {
+  const isNoStock = p.stock === 'nostock';
+  const badgeClass = { stock:'badge-stock', nostock:'badge-nostock', consultar:'badge-consultar' }[p.stock];
+  const badgeLabel = { stock:'En stock', nostock:'Sin stock', consultar:'Consultar precio' }[p.stock];
+  const safeName = p.nombre.replace(/'/g,"\\'");
+
+  let imgHTML = '';
+  if (p.imagen) {
+    imgHTML = `<img class="prod-img" src="${p.imagen}" alt="${p.nombre}" onerror="this.outerHTML='<div class=prod-img-placeholder>📷</div>'">`;
+  } else {
+    imgHTML = `<div class="prod-img-placeholder">📷</div>`;
+  }
+
+  const addBtn = !isNoStock
+    ? `<button class="add-btn" onclick="event.stopPropagation();showVariantPicker('${p.id}',this)">🛒 Agregar</button>`
+    : '';
+
+  return `<div class="prod-card${isNoStock ? ' sin-stock':''}" onclick="openProductDetail('${p.id}')">
+    <button class="adm-card-btn" onclick="event.stopPropagation();admEditProduct('${p.id}')">✏️ Editar</button>
+    ${imgHTML}
+    <div class="prod-sub">${p.subcategoria}</div>
+    <div class="prod-name">${p.nombre}</div>
+    <span class="prod-badge ${badgeClass}">${badgeLabel}</span>
+    ${(function(){ const precios = [p.precio, p.precio4, p.precio5, p.precio20, p.precio25].filter(v => v != null); const min = precios.length ? Math.min(...precios) : null; return min != null ? `<div class="prod-price"><span style="font-size:11px;font-weight:500;color:var(--gray-500)">desde</span> USD ${Number(min).toLocaleString('en-US')} <span style="font-size:11px;font-weight:500;color:var(--gray-500)">/ kg.</span></div>` : `<div class="prod-price-na">Sin disponibilidad publicada</div>`; })()}
+    <div class="prod-card-footer">
+      <button class="consultar-btn" onclick="event.stopPropagation();openProductDetail('${p.id}')">Ver detalle</button>
+      ${addBtn}
+    </div>
+  </div>`;
+}
+
+renderCatalog();
+
+// ── FILTER ────────────────────────────────────────────────────────────────────
+function filtrar(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.cat-block').forEach(block => {
+    block.classList.toggle('hidden', cat !== 'all' && block.dataset.cat !== cat);
+  });
+}
+
+// ── WHATSAPP ──────────────────────────────────────────────────────────────────
+function cotizar(nombre) {
+  const msg = encodeURIComponent('Hola! Quiero consultar sobre el producto: ' + nombre);
+  window.open('https://wa.me/5491137608638?text=' + msg, '_blank');
+}
+
+// ── MODAL DETALLE PRODUCTO ────────────────────────────────────────────────────
+const CAT_COLORS = { colorantes:'#EC4899', dispersiones:'#F97316', pigmentos:'#8B5CF6', aditivos:'#14B8A6' };
+
+function openProductDetail(id) {
+  const p = DATOS.find(x => x.id === id);
+  if (!p) return;
+
+  const cc = CAT_COLORS[p.categoria] || '#EC4899';
+  const badgeClass = { stock:'badge-stock', nostock:'badge-nostock', consultar:'badge-consultar' }[p.stock];
+  const badgeLabel = { stock:'En stock', nostock:'Sin stock', consultar:'Consultar' }[p.stock];
+
+  const imgHTML = p.imagen
+    ? `<img class="pm-img" src="${p.imagen}" alt="${p.nombre}" onerror="this.outerHTML='<div class=pm-img-ph>📷</div>'">`
+    : `<div class="pm-img-ph">📷</div>`;
+
+  const fmtP = v => v != null ? `<span class="pm-price-val">USD ${Number(v).toLocaleString('en-US')}</span><span style="font-size:13px;font-weight:400;color:var(--gray-500);margin-left:4px;">/kg</span>` : `<span class="pm-price-consultar">No disponible</span>`;
+  const priceHTML = p.categoria === 'dispersiones'
+    ? `<div class="pm-prices">
+    <div class="pm-price-row"><span class="pm-price-lbl">1 kg</span>${fmtP(p.precio)}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">4 kg</span>${fmtP(p.precio4)}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">5 kg</span>${fmtP(p.precio5)}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">20 kg</span>${fmtP(p.precio20)}</div>
+  </div>`
+    : `<div class="pm-prices">
+    <div class="pm-price-row"><span class="pm-price-lbl">1 kg</span>${fmtP(p.precio)}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">5 kg</span>${fmtP(p.precio5)}</div>
+    <div class="pm-price-row"><span class="pm-price-lbl">25 kg</span>${fmtP(p.precio25)}</div>
+  </div>`;
+
+  const descHTML = p.descripcion
+    ? `<div class="pm-desc">${p.descripcion.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`
+    : '';
+
+  const addBtnHTML = p.stock !== 'nostock'
+    ? `<button class="pm-add" id="pm-add-btn" onclick="addToCartFromModal('${p.id}')">+ Agregar al carrito</button>`
+    : `<div class="pm-nostock">Sin stock actualmente</div>`;
+
+  const safeName = p.nombre.replace(/'/g,"\\'");
+
+  document.getElementById('prod-modal').innerHTML = `
+    <div class="pm-card">
+      <button class="pm-close" onclick="closeProductModal()">✕</button>
+      <div class="pm-body">
+        <div class="pm-img-col">${imgHTML}</div>
+        <div class="pm-info">
+          <div class="pm-badge-row">
+            <span class="prod-badge ${badgeClass}" style="font-size:11px;padding:3px 10px;">${badgeLabel}</span>
+            <span class="pm-sub" style="color:${cc}">${p.subcategoria}</span>
+          </div>
+          <div class="pm-name">${p.nombre}</div>
+          ${descHTML}
+          ${priceHTML}
+          <div class="pm-actions">
+            <button class="pm-wa" onclick="cotizar('${safeName}')">💬 Consultar por WhatsApp</button>
+            ${addBtnHTML}
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById('prod-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProductModal() {
+  document.getElementById('prod-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function addToCartFromModal(id) {
+  const btn = document.getElementById('pm-add-btn');
+  showVariantPicker(id, btn);
+}
+
+// ── CARRITO ────────────────────────────────────────────────────────────────────
+let carrito;
+try {
+  const raw = localStorage.getItem('qc_carrito');
+  // Si hay datos viejos con base64, borrar directamente
+  if (raw && raw.includes('"data:image')) { localStorage.removeItem('qc_carrito'); carrito = []; }
+  else carrito = JSON.parse(raw || '[]');
+} catch(e) { localStorage.removeItem('qc_carrito'); carrito = []; }
+// Guardar solo campos necesarios — nunca imágenes
+carrito = carrito.map(({ id, nombre, variante, categoria, subcategoria, precio, cantidad }) =>
+  ({ id, nombre, variante: variante||'', categoria, subcategoria, precio: precio||null, cantidad: cantidad||1 }));
+
+function saveCarrito() { localStorage.setItem('qc_carrito', JSON.stringify(carrito)); }
+saveCarrito();
+
+function showVariantPicker(id, btn) {
+  const prod = DATOS.find(p => p.id === id);
+  if (!prod) return;
+
+  // precioKg = precio por kg; total = precioKg × kg
+  const variants = prod.id === 'aditivo-opacante'
+    ? [ {key:'5kg',   label:'5 kg',   kg:5,   precioKg: prod.precio5},
+        {key:'10kg',  label:'10 kg',  kg:10,  precioKg: prod.precio10},
+        {key:'20kg',  label:'20 kg',  kg:20,  precioKg: prod.precio20},
+        {key:'200kg', label:'200 kg', kg:200, precioKg: prod.precio200} ]
+    : prod.categoria === 'dispersiones'
+    ? [ {key:'1kg',  label:'1 kg',  kg:1,  precioKg: prod.precio},
+        {key:'4kg',  label:'4 kg',  kg:4,  precioKg: prod.precio4},
+        {key:'5kg',  label:'5 kg',  kg:5,  precioKg: prod.precio5},
+        {key:'20kg', label:'20 kg', kg:20, precioKg: prod.precio20} ]
+    : [ {key:'1kg',  label:'1 kg',  kg:1,  precioKg: prod.precio},
+        {key:'5kg',  label:'5 kg',  kg:5,  precioKg: prod.precio5},
+        {key:'25kg', label:'25 kg', kg:25, precioKg: prod.precio25} ];
+
+  const existing = document.getElementById('variantPickerDyn');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'variantPickerDyn';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = () => overlay.remove();
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:white;border-radius:16px;padding:28px 24px;width:340px;max-width:92vw;box-shadow:0 24px 64px rgba(0,0,0,.4);';
+  box.onclick = e => e.stopPropagation();
+  box.innerHTML = `
+    <div style="font-size:16px;font-weight:800;color:#111827;margin-bottom:4px;">Elegí la presentación</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:20px;">${prod.nombre}</div>
+    <div id="variantBtnsDyn" style="display:flex;flex-direction:column;gap:8px;"></div>`;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  const btnsEl = document.getElementById('variantBtnsDyn');
+  variants.forEach(v => {
+    const vBtn = document.createElement('button');
+    vBtn.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border:1.5px solid #e5e7eb;border-radius:10px;background:white;cursor:pointer;font-size:14px;font-family:inherit;width:100%;';
+    const total   = (v.precioKg != null) ? Number(v.precioKg) * v.kg : null;
+    const cartId  = prod.id + '_' + v.key;
+    const stockU  = getStock(cartId) ?? 0;  // null = sin stock cargado = 0
+    const sinStock = stockU <= 0;
+    const stockTag = stockU > 0
+      ? `<span style="font-size:10px;color:#15803d;font-weight:600;">● ${stockU} unid. disp.</span>`
+      : `<span style="font-size:10px;color:#dc2626;font-weight:600;">● Sin stock</span>`;
+    if (total != null && !sinStock) {
+      vBtn.innerHTML = `<div style="line-height:1.5;""><span style="font-weight:700;color:#111827;">${v.label}</span>${stockTag ? '<br>'+stockTag : ''}</div><div style="text-align:right;line-height:1.4;"><div style="font-weight:700;color:#111827;">USD ${Number(total).toLocaleString('en-US')}</div><div style="font-size:11px;color:#9ca3af;">USD ${Number(v.precioKg).toLocaleString('en-US')}/kg</div></div>`;
+      vBtn.onmouseenter = () => { vBtn.style.borderColor='#F97316'; vBtn.style.background='#fff7ed'; };
+      vBtn.onmouseleave = () => { vBtn.style.borderColor='#e5e7eb'; vBtn.style.background='white'; };
+      vBtn.onclick = () => { overlay.remove(); _addVariantToCart(prod, v.key, v.label, v.precioKg, v.kg, btn); };
+    } else {
+      const motivo = sinStock ? 'Sin stock disponible' : 'No disponible en esta cantidad';
+      vBtn.innerHTML = `<span style="font-weight:700;color:#d1d5db;">${v.label}</span><span style="color:#d1d5db;font-size:13px;font-style:italic;">${motivo}</span>`;
+      vBtn.style.cssText += 'cursor:not-allowed;opacity:0.6;';
+      vBtn.disabled = true;
+    }
+    btnsEl.appendChild(vBtn);
+  });
+}
+
+function _addVariantToCart(prod, varKey, varLabel, precioKg, kg, btn) {
+  const precioTotal = (precioKg != null) ? Number(precioKg) * kg : null;
+  const cartId = prod.id + '_' + varKey;
+  const stockU    = getStock(cartId) ?? 0;  // null = sin stock cargado = 0
+  const existing  = carrito.find(i => i.id === cartId);
+  const cantActual = existing ? existing.cantidad : 0;
+  if ((cantActual + 1) > stockU) {
+    _showCartError(`Sin stock suficiente: quedan ${stockU} unidad/es de ${prod.nombre} (${varLabel}).`);
+    return;
+  }
+  if (existing) { existing.cantidad++; }
+  else {
+    carrito.push({ id: cartId, nombre: prod.nombre, variante: varLabel,
+      categoria: prod.categoria, subcategoria: prod.subcategoria,
+      precioKg: precioKg || null, precio: precioTotal, cantidad: 1 });
+  }
+  saveCarrito();
+  updateCartBadge();
+  renderCartSidebar();
+  if (btn) {
+    btn.textContent = '✓ Agregado';
+    btn.classList.add('added');
+    setTimeout(() => { btn.textContent = '+ Agregar'; btn.classList.remove('added'); }, 1200);
+  }
+}
+
+function changeQty(id, delta) {
+  const item = carrito.find(i => i.id === id);
+  if (!item) return;
+  if (delta > 0) {
+    const stockU = getStock(id) ?? 0;  // null = sin stock cargado = 0
+    if ((item.cantidad + 1) > stockU) {
+      _showCartError(`Sin stock suficiente: quedan ${stockU} unidad/es de ${item.nombre} (${item.variante}).`);
+      return;
+    }
+  }
+  item.cantidad += delta;
+  if (item.cantidad <= 0) carrito = carrito.filter(i => i.id !== id);
+  saveCarrito(); updateCartBadge(); renderCartSidebar();
+}
+
+function removeFromCart(id) {
+  carrito = carrito.filter(i => i.id !== id);
+  saveCarrito(); updateCartBadge(); renderCartSidebar();
+}
+
+function updateCartBadge() {
+  const total = carrito.reduce((s, i) => s + i.cantidad, 0);
+  const badge = document.getElementById('cartBadge');
+  if (!badge) return;
+  badge.textContent = total > 99 ? '99+' : total;
+  badge.classList.toggle('visible', total > 0);
+}
+
+function _cartItemsHTML() {
+  if (carrito.length === 0) {
+    return `<div style="text-align:center;padding:56px 0;color:#6b7280;">
+      <div style="font-size:48px;margin-bottom:12px;">🛒</div>
+      <p style="font-size:15px;">Tu carrito está vacío</p>
+    </div>`;
+  }
+  return carrito.map(item => `
+    <div style="display:flex;gap:12px;padding:12px;border:1.5px solid #e5e7eb;border-radius:10px;align-items:flex-start;margin-bottom:10px;">
+      <div style="width:48px;height:48px;border-radius:8px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📦</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:2px;">${item.nombre}</div>
+        <div style="font-size:11px;color:#6b7280;margin-bottom:6px;">${item.subcategoria}${item.variante ? ' · ' + item.variante : ''}</div>
+        ${item.precio != null ? `<div style="font-size:12px;font-weight:700;color:#F97316;margin-bottom:8px;">USD ${Number(item.precio * item.cantidad).toLocaleString('en-US')}${item.cantidad > 1 ? ' <span style="font-weight:400;color:#9ca3af;">('+item.cantidad+' × USD '+Number(item.precio).toLocaleString('en-US')+')</span>' : ''}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button onclick="changeQty('${item.id}',-1)" style="width:26px;height:26px;border-radius:6px;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-size:14px;font-weight:700;">−</button>
+          <span style="font-size:14px;font-weight:700;min-width:22px;text-align:center;">${item.cantidad}</span>
+          <button onclick="changeQty('${item.id}',1)" style="width:26px;height:26px;border-radius:6px;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-size:14px;font-weight:700;">+</button>
+          <button onclick="removeFromCart('${item.id}')" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:15px;margin-left:auto;">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function _cartFooterHTML() {
+  if (carrito.length === 0) {
+    return `<div style="font-size:13px;color:#6b7280;text-align:center;">Agregá productos para continuar</div>
+      <a href="checkout.html" style="display:block;text-align:center;padding:14px;background:linear-gradient(135deg,#F97316,#EC4899);color:white;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;opacity:.4;pointer-events:none;">Ver pedido →</a>`;
+  }
+  const total = carrito.reduce((s,i) => s + i.cantidad, 0);
+  return `<div style="font-size:13px;color:#6b7280;text-align:center;">${total} producto${total!==1?'s':''} en el pedido</div>
+    <a href="checkout.html" style="display:block;text-align:center;padding:14px;background:linear-gradient(135deg,#F97316,#EC4899);color:white;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;">Continuar con el pedido →</a>`;
+}
+
+function openCart() {
+  closeCart();
+  const ov = document.createElement('div');
+  ov.id = 'cartOverlayDyn';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;';
+  ov.onclick = closeCart;
+
+  const sb = document.createElement('div');
+  sb.id = 'cartSidebarDyn';
+  sb.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(480px,92vw);max-height:85vh;background:white;z-index:9999;display:flex;flex-direction:column;border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);';
+  sb.onclick = e => e.stopPropagation();
+
+  const total = carrito.reduce((s,i) => s + i.cantidad, 0);
+  sb.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #e5e7eb;flex-shrink:0;">
+      <h3 style="font-size:18px;font-weight:800;color:#111827;margin:0;">🛒 Tu pedido</h3>
+      <button onclick="closeCart()" style="background:none;border:none;font-size:18px;cursor:pointer;color:#6b7280;width:32px;height:32px;border-radius:6px;">✕</button>
+    </div>
+    <div id="cartErrorDyn" style="display:none;margin:0 24px;padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;font-weight:600;flex-shrink:0;"></div>
+    <div id="cartItemsDyn" style="flex:1;overflow-y:auto;padding:16px 24px;">${_cartItemsHTML()}</div>
+    <div id="cartFooterDyn" style="padding:20px 24px;border-top:1px solid #e5e7eb;display:flex;flex-direction:column;gap:12px;flex-shrink:0;">${_cartFooterHTML()}</div>`;
+
+  document.body.appendChild(ov);
+  document.body.appendChild(sb);
+  document.body.style.overflow = 'hidden';
+}
+
+function _showCartError(msg) {
+  const el = document.getElementById('cartErrorDyn');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function closeCart() {
+  const ov = document.getElementById('cartOverlayDyn');
+  const sb = document.getElementById('cartSidebarDyn');
+  if (ov) ov.remove();
+  if (sb) sb.remove();
+  document.body.style.overflow = '';
+}
+
+function renderCartSidebar() {
+  const itemsEl = document.getElementById('cartItemsDyn');
+  const footerEl = document.getElementById('cartFooterDyn');
+  if (itemsEl) itemsEl.innerHTML = _cartItemsHTML();
+  if (footerEl) footerEl.innerHTML = _cartFooterHTML();
+}
+
+updateCartBadge();
+
+// Cerrar modales con Escape
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  closeProductModal();
+  admCloseModal();
+  closeCart();
+  closeAdminLogin();
+});
+
+// ── ADMIN MODE ────────────────────────────────────────────────────────────────
+const ADM_USER = 'admin';
+const ADM_PASS = 'quimicacolor2024';
+const ADM_KEY  = 'qc_admin_ok';
+
+// IndexedDB: guarda el handle del archivo entre sesiones (sobrevive a F5)
+const _IDB = {
+  _db: null,
+  open() {
+    if (this._db) return Promise.resolve(this._db);
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('qc_admin_v1', 1);
+      r.onupgradeneeded = e => e.target.result.createObjectStore('h');
+      r.onsuccess = e => { this._db = e.target.result; res(this._db); };
+      r.onerror = rej;
+    });
+  },
+  async set(k, v) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const tx = db.transaction('h', 'readwrite');
+      tx.objectStore('h').put(v, k);
+      tx.oncomplete = res; tx.onerror = rej;
+    });
+  },
+  async get(k) {
+    const db = await this.open();
+    return new Promise((res, rej) => {
+      const r = db.transaction('h').objectStore('h').get(k);
+      r.onsuccess = e => res(e.target.result || null);
+      r.onerror = rej;
+    });
+  }
+};
+
+async function _restoreFileHandle() {
+  if (!window.showDirectoryPicker) return;
+  try {
+    const dh = await _IDB.get('dir');
+    if (!dh) return;
+    const perm = await dh.queryPermission({ mode: 'readwrite' });
+    if (perm === 'granted') {
+      await _usarCarpeta(dh);
+      admUpdateStatus('✅ Carpeta conectada — cada "Guardar cambios" escribe automáticamente al disco');
+    } else {
+      admUpdateStatus('⚠️ Hacé clic en 📁 Conectar carpeta para reconectar el sitio');
+    }
+  } catch(e) {
+    admUpdateStatus('⚠️ Hacé clic en 📁 Conectar carpeta para conectar el sitio');
+  }
+}
+
+// La carpeta del sitio (quimicacolor/): de ahí salen productos-data.js e imgs/
+async function _usarCarpeta(dh) {
+  admDirHandle  = dh;
+  admFileHandle = await dh.getFileHandle('productos-data.js', { create: true });
+}
+
+// Pide la carpeta al usuario y la recuerda para la próxima vez. Devuelve true si quedó conectada.
+async function admConectarCarpeta() {
+  if (!window.showDirectoryPicker) {
+    alert('Este navegador no permite guardar en la carpeta. Usá Chrome o Edge.');
+    return false;
+  }
+  try {
+    const dh = await window.showDirectoryPicker({ mode: 'readwrite', id: 'quimicacolor' });
+    await _usarCarpeta(dh);
+    await _IDB.set('dir', dh);
+    return true;
+  } catch(e) {
+    if (e.name !== 'AbortError') alert('No se pudo conectar la carpeta: ' + e.message);
+    return false;
+  }
+}
+
+let admDirHandle  = null;
+let admFileHandle = null; // handle al productos-data.js — persiste en la sesión
+let admUnsaved    = false;
+let admEditId     = null;
+let admEditStock  = 'stock';
+let admPendingImg = null;
+
+// Verificar sesión activa — esperar a que el DOM esté completo
+document.addEventListener('DOMContentLoaded', function() {
+  if (sessionStorage.getItem(ADM_KEY) === '1') enableAdminMode();
+});
+
+function openAdminLogin() {
+  document.getElementById('adm-login').classList.add('open');
+  setTimeout(() => document.getElementById('adm-user').focus(), 80);
+}
+function closeAdminLogin() {
+  document.getElementById('adm-login').classList.remove('open');
+}
+
+function doAdminLogin(e) {
+  e.preventDefault();
+  const u = document.getElementById('adm-user').value.trim();
+  const p = document.getElementById('adm-pass').value;
+  const err = document.getElementById('adm-err');
+  if (u === ADM_USER && p === ADM_PASS) {
+    sessionStorage.setItem(ADM_KEY, '1');
+    closeAdminLogin();
+    err.classList.remove('show');
+    enableAdminMode();
+  } else {
+    err.classList.add('show');
+    document.getElementById('adm-pass').value = '';
+    document.getElementById('adm-pass').focus();
+  }
+}
+
+function enableAdminMode() {
+  document.body.classList.add('admin-mode');
+  document.getElementById('adm-bar').classList.add('open');
+  renderCatalog();
+  _restoreFileHandle(); // intenta reconectar el archivo automáticamente
+}
+
+function admLogout() {
+  sessionStorage.removeItem(ADM_KEY);
+  document.body.classList.remove('admin-mode');
+  document.getElementById('adm-bar').classList.remove('open');
+  renderCatalog();
+}
+
+function admUpdateStatus(msg) {
+  document.getElementById('adm-bar-info').textContent = msg || '';
+}
+
+function saveLocalOverride() {
+  try {
+    localStorage.setItem(QC_LOCAL_KEY, JSON.stringify(DATOS));
+    return true;
+  } catch(e) {
+    return false; // quota u otro error
+  }
+}
+
+function _serializarProductos() {
+  return DATOS.map(p => {
+    const img     = p.imagen      ? `"${p.imagen}"`      : 'null';
+    const precio   = p.precio    != null ? p.precio    : 'null';
+    const precio4  = p.precio4   != null ? p.precio4   : 'null';
+    const precio5  = p.precio5   != null ? p.precio5   : 'null';
+    const precio10 = p.precio10  != null ? p.precio10  : 'null';
+    const precio20 = p.precio20  != null ? p.precio20  : 'null';
+    const precio25 = p.precio25  != null ? p.precio25  : 'null';
+    const precio200= p.precio200 != null ? p.precio200 : 'null';
+    const desc    = p.descripcion ? `"${p.descripcion.replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/\n/g,'\\n')}"` : 'null';
+    if (p.id === 'aditivo-opacante') {
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}, descripcion:${desc} }`;
+    }
+    if (p.categoria === 'dispersiones') {
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio4:${precio4}, precio5:${precio5}, precio20:${precio20}, descripcion:${desc} }`;
+    }
+    return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}", imagen:${img}, precio:${precio}, precio5:${precio5}, precio25:${precio25}, descripcion:${desc} }`;
+  });
+}
+
+// Descargar productos-data.js actualizado (fallback cuando File System API no está disponible)
+function admDescargarJS() {
+  const rows = _serializarProductos();
+  const contenido = `// Fuente de verdad del catálogo\nconst PRODUCTOS_DATA = [\n${rows.join(',\n')},\n];\n`;
+  const blob = new Blob([contenido], { type: 'application/javascript' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'productos-data.js'; a.click();
+  URL.revokeObjectURL(url);
+  admUpdateStatus('✓ Archivo descargado — reemplazá productos-data.js en tu carpeta quimicacolor');
+}
+
+async function _escribirArchivo(fh) {
+  const contenido = `// Fuente de verdad del catálogo\nconst PRODUCTOS_DATA = [\n${_serializarProductos().join(',\n')},\n];\n`;
+  const w = await fh.createWritable();
+  await w.write(contenido);
+  await w.close();
+  localStorage.removeItem(QC_LOCAL_KEY);
+}
+
+// Conecta la carpeta del sitio (la primera vez) y escribe productos-data.js
+async function admGuardar() {
+  if (window.showDirectoryPicker) {
+    if (!admDirHandle && !(await admConectarCarpeta())) return;
+    try {
+      await _escribirArchivo(admFileHandle);
+      admUpdateStatus('✅ Guardado en productos-data.js. De ahora en adelante cada "Guardar cambios" escribe solo — incluso después de F5.');
+    } catch(e) {
+      admUpdateStatus('⚠️ Error al guardar: ' + e.message);
+    }
+    return;
+  }
+  _descargar();
+}
+
+function _descargar() {
+  const contenido = `// Fuente de verdad del catálogo\nconst PRODUCTOS_DATA = [\n${_serializarProductos().join(',\n')},\n];\n`;
+  const blob = new Blob([contenido], { type: 'text/javascript' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'productos-data.js'; a.click();
+  URL.revokeObjectURL(url);
+  admUpdateStatus('✓ Archivo descargado. Reemplazá productos-data.js en tu carpeta quimicacolor.');
+}
+
+function admDescargarJS() { admGuardar(); }
+function admConectar()    { admGuardar(); }
+
+
+// Mantener compatibilidad (no se usa más desde la barra)
+function admDescargarJS() { admGuardar(); }
+function admConectar() { admGuardar(); }
+
+// Abrir modal de edición
+function admEditProduct(id) {
+  const p = DATOS.find(x => x.id === id);
+  if (!p) return;
+  admEditId    = id;
+  admPendingImg = null;
+  admSetStock(p.stock);
+
+  document.getElementById('adm-modal-title').textContent = p.nombre;
+  document.getElementById('adm-f-nombre').value = p.nombre;
+  document.getElementById('adm-f-cat').value    = p.categoria;
+  document.getElementById('adm-f-sub').value    = p.subcategoria;
+  const _inp = (id, lbl, val) => `<div><div style="font-size:11px;color:var(--gray-500);margin-bottom:3px;">${lbl}</div><input type="number" id="${id}" placeholder="—" min="0" step="0.01" style="font-size:15px;font-weight:700;width:100%;" value="${val ?? ''}" /></div>`;
+  const _stk = (cartId, lbl) => { const s = getStock(cartId); return `<div><div style="font-size:11px;color:#15803d;margin-bottom:3px;">📦 Unidades ${lbl}</div><input type="number" id="adm-stk-${cartId}" placeholder="—" min="0" step="1" style="font-size:15px;font-weight:700;width:100%;border-color:#bbf7d0;" value="${s !== null ? s : ''}" /></div>`; };
+  const pg = document.getElementById('adm-price-grid');
+  if (p.id === 'aditivo-opacante') {
+    pg.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+    pg.innerHTML = _inp('adm-f-precio5','5 kg',p.precio5) + _inp('adm-f-precio10','10 kg',p.precio10) + _inp('adm-f-precio20','20 kg',p.precio20) + _inp('adm-f-precio200','200 kg',p.precio200)
+      + _stk(p.id+'_5kg','5 kg') + _stk(p.id+'_10kg','10 kg') + _stk(p.id+'_20kg','20 kg') + _stk(p.id+'_200kg','200 kg');
+  } else if (p.categoria === 'dispersiones') {
+    pg.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+    pg.innerHTML = _inp('adm-f-precio','1 kg',p.precio) + _inp('adm-f-precio4','4 kg',p.precio4) + _inp('adm-f-precio5','5 kg',p.precio5) + _inp('adm-f-precio20','20 kg',p.precio20)
+      + _stk(p.id+'_1kg','1 kg') + _stk(p.id+'_4kg','4 kg') + _stk(p.id+'_5kg','5 kg') + _stk(p.id+'_20kg','20 kg');
+  } else {
+    pg.style.gridTemplateColumns = '1fr 1fr 1fr';
+    pg.innerHTML = _inp('adm-f-precio','1 kg',p.precio) + _inp('adm-f-precio5','5 kg',p.precio5) + _inp('adm-f-precio25','25 kg',p.precio25)
+      + _stk(p.id+'_1kg','1 kg') + _stk(p.id+'_5kg','5 kg') + _stk(p.id+'_25kg','25 kg');
+  }
+  document.getElementById('adm-f-desc').value   = p.descripcion || '';
+
+  const prev = document.getElementById('adm-img-prev');
+  const lbl  = document.getElementById('adm-img-lbl');
+  const rm   = document.getElementById('adm-img-rm');
+  if (p.imagen) {
+    prev.src = p.imagen; prev.style.display = 'block';
+    lbl.style.display = 'none'; rm.style.display = 'block';
+  } else {
+    prev.style.display = 'none'; lbl.style.display = 'flex'; rm.style.display = 'none';
+  }
+
+  document.getElementById('adm-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function admCloseModal() {
+  document.getElementById('adm-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  admEditId = null; admPendingImg = null;
+}
+
+function admSetStock(val) {
+  admEditStock = val;
+  document.querySelectorAll('.adm-st').forEach(b => {
+    b.className = 'adm-st' + (b.dataset.v === val ? ' s-' + val : '');
+  });
+}
+
+// Imagen en modal de edición
+function admTriggerImg() { document.getElementById('adm-file').click(); }
+function admHandleFile(inp) { if (inp.files[0]) admProcessImg(inp.files[0]); inp.value = ''; }
+function admOnDragOver(e) { e.preventDefault(); document.getElementById('adm-img-zone').style.borderColor = '#F97316'; }
+function admOnDragLeave() { document.getElementById('adm-img-zone').style.borderColor = ''; }
+function admOnDrop(e) { e.preventDefault(); document.getElementById('adm-img-zone').style.borderColor = ''; if (e.dataTransfer.files[0]) admProcessImg(e.dataTransfer.files[0]); }
+
+function blobToDataUrl(blob) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function admProcessImg(file) {
+  const conMarca = document.getElementById('adm-img-marca').checked;
+  const blob = await admResizeWatermark(file, conMarca);
+  const dataUrl = await blobToDataUrl(blob); // solo para la vista previa
+  admPendingImg = { blob, dataUrl, filename: admEditId + '.webp', path: 'imgs/' + admEditId + '.webp' };
+  const prev = document.getElementById('adm-img-prev');
+  prev.src = dataUrl; prev.style.display = 'block';
+  document.getElementById('adm-img-lbl').style.display = 'none';
+  document.getElementById('adm-img-rm').style.display = 'block';
+}
+
+function admRemoveImg() {
+  admPendingImg = { remove: true };
+  document.getElementById('adm-img-prev').style.display = 'none';
+  document.getElementById('adm-img-lbl').style.display = 'flex';
+  document.getElementById('adm-img-rm').style.display = 'none';
+}
+
+// Guardar cambios del producto
+async function admSaveProduct() {
+  const idx = DATOS.findIndex(x => x.id === admEditId);
+  if (idx < 0) return;
+  const p = DATOS[idx];
+
+  p.nombre       = document.getElementById('adm-f-nombre').value.trim() || p.nombre;
+  p.categoria    = document.getElementById('adm-f-cat').value;
+  p.subcategoria = document.getElementById('adm-f-sub').value.trim() || p.subcategoria;
+  p.stock        = admEditStock;
+  const _pval = id => { const el = document.getElementById(id); return el && el.value !== '' ? Number(el.value) : null; };
+  p.precio   = _pval('adm-f-precio');
+  p.precio4  = _pval('adm-f-precio4');
+  p.precio5  = _pval('adm-f-precio5');
+  p.precio10 = _pval('adm-f-precio10');
+  p.precio20 = _pval('adm-f-precio20');
+  p.precio25 = _pval('adm-f-precio25');
+  p.precio200= _pval('adm-f-precio200');
+  p.descripcion = document.getElementById('adm-f-desc').value.trim() || null;
+
+  // Guardar stock por variante
+  const _sval = (cartId) => {
+    const el = document.getElementById('adm-stk-' + cartId);
+    return el && el.value !== '' ? Number(el.value) : null;
+  };
+  const stockKeys = p.id === 'aditivo-opacante'
+    ? ['5kg','10kg','20kg','200kg']
+    : p.categoria === 'dispersiones'
+    ? ['1kg','4kg','5kg','20kg']
+    : ['1kg','5kg','25kg'];
+  stockKeys.forEach(k => {
+    const cartId = p.id + '_' + k;
+    const val = _sval(cartId);
+    if (val !== null) setStock(cartId, val);
+  });
+
+  if (admPendingImg) {
+    if (admPendingImg.remove) {
+      p.imagen = null;
+    } else if (!admDirHandle && !(await admConectarCarpeta())) {
+      alert('Para guardar la foto hay que conectar la carpeta del sitio. Los demás cambios se guardan igual; la foto no.');
+    } else {
+      try {
+        const imgsDir = await admDirHandle.getDirectoryHandle('imgs', { create: true });
+        const fh = await imgsDir.getFileHandle(admPendingImg.filename, { create: true });
+        const w  = await fh.createWritable();
+        await w.write(admPendingImg.blob);
+        await w.close();
+        p.imagen = admPendingImg.path;
+      } catch(e) { alert('Error al guardar imagen: ' + e.message); return; }
+    }
+  }
+
+  saveLocalOverride();
+  admUnsaved = true;
+
+  if (admFileHandle) {
+    // Handle establecido: escribe al disco automáticamente
+    _escribirArchivo(admFileHandle)
+      .then(() => admUpdateStatus('✅ Guardado automáticamente en el archivo'))
+      .catch(() => admUpdateStatus('⚠️ Error al guardar en archivo — hacé clic en 📁 Conectar carpeta y guardar'));
+  } else {
+    admUpdateStatus('✓ Cambio aplicado — hacé clic en 📁 Conectar carpeta y guardar para no perderlo si recargás');
+  }
+
+  admCloseModal();
+  renderCatalog();
+}
+
+// Eliminar producto
+function admDeleteProduct() {
+  const p = DATOS.find(x => x.id === admEditId);
+  if (!p || !confirm('¿Eliminar "' + p.nombre + '"?')) return;
+  const idx = DATOS.indexOf(p);
+  DATOS.splice(idx, 1);
+  saveLocalOverride();
+  admUnsaved = true;
+  admUpdateStatus('✓ Eliminado — hacé clic en 📁 Conectar carpeta y guardar cuando termines');
+  admCloseModal();
+  renderCatalog();
+}
+
+// Redimensiona a máximo 900px sin recortar, fondo blanco, marca de agua opcional, salida WebP
+function admResizeWatermark(file, conMarca) {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 900;
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const k = Math.min(1, MAX / Math.max(w, h));
+      w = Math.round(w * k); h = Math.round(h * k);
+      const cv  = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+
+      if (conMarca) {
+        const fs  = Math.max(12, Math.round(w * 0.028));
+        const txt = '© quimicacolor.com.ar';
+        ctx.font  = `bold ${fs}px Arial`;
+        const tw  = ctx.measureText(txt).width;
+        const pad = 8;
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(w - tw - pad*2 - 4, h - fs - pad*2 - 4, tw + pad*2, fs + pad*2);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fillText(txt, w - tw - pad - 4, h - pad - 4);
+      }
+
+      URL.revokeObjectURL(url);
+      cv.toBlob(blob => resolve(blob), 'image/webp', 0.85);
+    };
+    img.src = url;
+  });
+}
+</script>
+<!-- PRODUCT DETAIL MODAL -->
+<div id="prod-modal" onclick="if(event.target===this)closeProductModal()"></div>
+
+<!-- ADMIN TRIGGER -->
+<button class="admin-trigger" onclick="openAdminLogin()" title="Acceso administrador">⚙️</button>
+
+<!-- ADMIN LOGIN MODAL -->
+<div id="adm-login">
+  <div class="adm-login-card">
+    <div class="adm-login-logo"><img src="logo.webp" alt="Química Color" /></div>
+    <div class="adm-login-title">Administrador</div>
+    <div class="adm-login-sub">Ingresá para editar productos</div>
+    <form onsubmit="doAdminLogin(event)">
+      <div class="adm-f">
+        <label>Usuario</label>
+        <input type="text" id="adm-user" placeholder="admin" autocomplete="username" />
+      </div>
+      <div class="adm-f">
+        <label>Contraseña</label>
+        <input type="password" id="adm-pass" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button type="submit" class="adm-submit">Ingresar →</button>
+    </form>
+    <div class="adm-err" id="adm-err">Usuario o contraseña incorrectos</div>
+    <button class="adm-cancel" onclick="closeAdminLogin()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ADMIN BAR (bottom) -->
+<div id="adm-bar">
+  <span class="adm-bar-tag">⚙️ MODO ADMIN</span>
+  <span class="adm-bar-info" id="adm-bar-info">Primero hacé clic en 📁 Conectar carpeta y elegí la carpeta quimicacolor — después cada cambio se guarda solo</span>
+  <button class="adm-bar-btn save" id="adm-btn-save" onclick="admGuardar()">📁 Conectar carpeta y guardar</button>
+  <button class="adm-bar-btn logout" onclick="admLogout()">🚪 Salir</button>
+</div>
+
+<!-- ADMIN PRODUCT EDIT MODAL -->
+<div id="adm-modal" onclick="if(event.target===this)admCloseModal()">
+  <div class="adm-modal">
+    <div class="adm-modal-head">
+      <div class="adm-modal-title" id="adm-modal-title">Editar producto</div>
+      <button class="adm-modal-close" onclick="admCloseModal()">✕</button>
+    </div>
+    <div class="adm-modal-body">
+      <div>
+        <div class="adm-img-zone" id="adm-img-zone" onclick="admTriggerImg()" ondragover="admOnDragOver(event)" ondragleave="admOnDragLeave()" ondrop="admOnDrop(event)">
+          <img id="adm-img-prev" src="" alt="" style="display:none;" />
+          <div class="adm-img-lbl" id="adm-img-lbl">
+            <span>📷</span>
+            <div>Clic o arrastrá<br>una foto</div>
+          </div>
+        </div>
+        <button class="adm-img-rm" id="adm-img-rm" onclick="admRemoveImg()" style="display:none;">✕ Quitar foto</button>
+        <label style="display:flex;gap:6px;align-items:flex-start;margin-top:8px;font-size:11px;color:#6b7280;cursor:pointer;line-height:1.3;">
+          <input type="checkbox" id="adm-img-marca" checked style="margin-top:1px;" />
+          <span>Agregar marca de agua © quimicacolor.com.ar (destildá si la foto ya la tiene)</span>
+        </label>
+      </div>
+      <div class="adm-form">
+        <div>
+          <label>Nombre del producto</label>
+          <input type="text" id="adm-f-nombre" />
+        </div>
+        <div>
+          <label>Categoría</label>
+          <select id="adm-f-cat">
+            <option value="colorantes">🧪 Colorantes</option>
+            <option value="dispersiones">🎨 Dispersiones</option>
+            <option value="pigmentos">🔬 Pigmentos</option>
+            <option value="aditivos">⚗️ Aditivos</option>
+          </select>
+        </div>
+        <div>
+          <label>Subcategoría</label>
+          <input type="text" id="adm-f-sub" />
+        </div>
+        <div>
+          <label>Stock</label>
+          <div class="adm-stock-row">
+            <button class="adm-st" data-v="stock"     onclick="admSetStock('stock')">✓ En stock</button>
+            <button class="adm-st" data-v="nostock"   onclick="admSetStock('nostock')">✗ Sin stock</button>
+            <button class="adm-st" data-v="consultar" onclick="admSetStock('consultar')">? Consultar</button>
+          </div>
+        </div>
+        <div>
+          <label>Precios (USD) — dejá vacío los que sean a consultar</label>
+          <div id="adm-price-grid" style="display:grid;gap:8px;margin-top:4px;"></div>
+        <div>
+          <label>Descripción (opcional)</label>
+          <textarea id="adm-f-desc" rows="4" placeholder="Información técnica, usos, presentaciones disponibles, características..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="adm-modal-foot">
+      <button class="adm-del" onclick="admDeleteProduct()">🗑 Eliminar</button>
+      <div style="display:flex;gap:8px;">
+        <button class="adm-sec" onclick="admCloseModal()">Cancelar</button>
+        <button class="adm-pri" onclick="admSaveProduct()">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+<input type="file" id="adm-file" accept="image/*" style="display:none" onchange="admHandleFile(this)" />
+
+
+</body>
+</html>

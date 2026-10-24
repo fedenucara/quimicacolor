@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hacer Pedido | Química Color</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gray-900: #0F172A; --gray-700: #334155; --gray-500: #64748B;
+      --gray-300: #CBD5E1; --gray-200: #E2E8F0; --gray-100: #F1F5F9;
+      --gray-50:  #F8FAFC; --white:    #FFFFFF;
+      --accent:   #F97316; --accent2:  #EC4899;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Exo 2', sans-serif; color: var(--gray-700); background: var(--gray-50); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    .spectrum { height: 5px; background: linear-gradient(90deg,#CC2222,#E85A1A,#F5A800,#2A8A3E,#1A7A6E,#1A4E9A); }
+
+    header {
+      background: var(--white); border-bottom: 1px solid var(--gray-200);
+      position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      height: 72px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo img { height: 56px; width: auto; object-fit: contain; display: block; }
+    .back-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 14px; font-weight: 600; color: var(--gray-500);
+      padding: 8px 14px; border-radius: 8px; transition: all .15s;
+    }
+    .back-link:hover { background: var(--gray-50); color: var(--gray-900); }
+
+    /* ── VACÍO ─────────────────────────────────────────────── */
+    .empty-state {
+      max-width: 480px; margin: 80px auto; text-align: center; padding: 0 24px;
+    }
+    .empty-icon { font-size: 64px; margin-bottom: 20px; }
+    .empty-state h2 { font-size: 24px; font-weight: 800; color: var(--gray-900); margin-bottom: 10px; }
+    .empty-state p { color: var(--gray-500); margin-bottom: 28px; font-size: 15px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg,var(--accent),var(--accent2));
+      color: white; padding: 13px 28px; border-radius: 10px;
+      font-size: 15px; font-weight: 700; transition: all .2s;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(249,115,22,.4); }
+
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .page-header {
+      max-width: 1200px; margin: 0 auto; padding: 32px 24px 0;
+    }
+    .page-title { font-size: 26px; font-weight: 900; color: var(--gray-900); margin-bottom: 4px; }
+    .page-sub { font-size: 14px; color: var(--gray-500); }
+
+    .checkout-grid {
+      max-width: 1200px; margin: 28px auto 80px; padding: 0 24px;
+      display: grid; grid-template-columns: 380px 1fr; gap: 28px; align-items: start;
+    }
+
+    /* ── TARJETAS ─────────────────────────────────────────── */
+    .card {
+      background: var(--white); border: 1.5px solid var(--gray-200);
+      border-radius: 14px; overflow: hidden;
+    }
+    .card-head {
+      padding: 18px 22px; border-bottom: 1px solid var(--gray-200);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-head h2 { font-size: 16px; font-weight: 800; color: var(--gray-900); }
+    .card-body { padding: 22px; }
+    .vaciar-link { font-size: 12px; color: var(--gray-500); cursor: pointer; transition: color .15s; background: none; border: none; font-family: inherit; }
+    .vaciar-link:hover { color: #DC2626; }
+
+    /* ── ITEMS DEL PEDIDO ─────────────────────────────────── */
+    .order-items { display: flex; flex-direction: column; gap: 12px; }
+    .order-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px; border: 1.5px solid var(--gray-200); border-radius: 10px;
+    }
+    .order-item-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .order-item-thumb {
+      width: 60px; height: 60px; border-radius: 8px;
+      background: var(--gray-100); display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .order-item-info { flex: 1; min-width: 0; }
+    .order-item-name { font-size: 13px; font-weight: 700; color: var(--gray-900); line-height: 1.3; margin-bottom: 2px; }
+    .order-item-cat { font-size: 11px; color: var(--gray-500); margin-bottom: 8px; }
+    .qty-row { display: flex; align-items: center; gap: 6px; }
+    .qty-btn {
+      width: 28px; height: 28px; border-radius: 7px; border: 1.5px solid var(--gray-200);
+      background: white; cursor: pointer; font-size: 16px; font-weight: 700;
+      color: var(--gray-700); display: flex; align-items: center; justify-content: center;
+      padding: 0; transition: border-color .15s;
+    }
+    .qty-btn:hover { border-color: var(--gray-500); background: var(--gray-50); }
+    .qty-num { font-size: 14px; font-weight: 800; min-width: 22px; text-align: center; }
+    .item-del { background: none; border: none; color: var(--gray-400); cursor: pointer; font-size: 15px; padding: 4px; border-radius: 4px; margin-left: auto; }
+    .item-del:hover { color: #DC2626; }
+
+    .order-summary-foot {
+      padding: 16px 22px 18px; border-top: 1px solid var(--gray-200);
+      text-align: center;
+    }
+    .order-count { font-size: 14px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+    .order-note { font-size: 12px; color: var(--gray-500); }
+    .order-item-price { font-size: 13px; font-weight: 800; color: var(--gray-900); margin-top: 4px; }
+    .order-item-price-na { font-size: 12px; color: var(--gray-400); font-style: italic; margin-top: 4px; }
+    .order-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 22px; border-top: 2px solid var(--gray-200); background: var(--gray-50);
+    }
+    .order-total-label { font-size: 13px; font-weight: 700; color: var(--gray-700); }
+    .order-total-value { font-size: 20px; font-weight: 900; color: var(--gray-900); }
+    .order-total-partial { font-size: 11px; color: var(--gray-500); text-align: right; margin-top: 2px; }
+
+    /* ── FORMULARIO ───────────────────────────────────────── */
+    .form-section { display: flex; flex-direction: column; gap: 16px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; font-weight: 700; color: var(--gray-700); letter-spacing: .3px; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 14px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+      font-family: 'Exo 2', sans-serif; font-size: 14px; color: var(--gray-900);
+      background: white; transition: border-color .15s;
+      width: 100%; outline: none;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    .optional-tag { font-size: 10px; font-weight: 500; color: var(--gray-400); margin-left: 4px; }
+
+    .btn-submit {
+      width: 100%; padding: 16px; margin-top: 8px;
+      background: linear-gradient(135deg,var(--accent),var(--accent2));
+      color: white; border: none; border-radius: 10px;
+      font-size: 16px; font-weight: 800; font-family: 'Exo 2', sans-serif;
+      cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(249,115,22,.4); }
+    .btn-submit:active { transform: none; }
+    .form-legal { font-size: 11px; color: var(--gray-500); text-align: center; margin-top: 6px; line-height: 1.5; }
+
+    /* ── CONFIRMACIÓN ─────────────────────────────────────── */
+    #confirmacion { display: none; }
+    .confirm-hero {
+      background: linear-gradient(135deg,#F0FDF4,#ECFDF5);
+      border: 1.5px solid #BBF7D0; border-radius: 14px; padding: 32px;
+      text-align: center; margin-bottom: 20px;
+    }
+    .confirm-icon { font-size: 56px; margin-bottom: 12px; }
+    .confirm-hero h2 { font-size: 22px; font-weight: 900; color: #15803D; margin-bottom: 8px; }
+    .confirm-hero p { font-size: 14px; color: #166534; max-width: 400px; margin: 0 auto; }
+
+    .bank-card {
+      background: var(--white); border: 1.5px solid var(--gray-200); border-radius: 14px; overflow: hidden;
+    }
+    .bank-card-head {
+      padding: 16px 22px; background: var(--gray-900); color: white;
+      font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px;
+    }
+    .bank-rows { padding: 8px 0; }
+    .bank-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 13px 22px; border-bottom: 1px solid var(--gray-100);
+    }
+    .bank-row:last-child { border-bottom: none; }
+    .bank-row-label { font-size: 12px; color: var(--gray-500); font-weight: 600; }
+    .bank-row-value { font-size: 14px; font-weight: 800; color: var(--gray-900); font-family: 'Inter', monospace; }
+    .copy-btn {
+      background: none; border: 1px solid var(--gray-200); border-radius: 5px;
+      font-size: 11px; color: var(--gray-500); padding: 3px 8px; cursor: pointer;
+      font-family: inherit; margin-left: 8px; transition: all .15s;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .bank-note {
+      padding: 14px 22px; background: #FFFBEB; border-top: 1px solid #FEF3C7;
+      font-size: 12px; color: #92400E; line-height: 1.5;
+    }
+
+    .confirm-actions {
+      display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .btn-wa-confirm {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: #22C55E; color: white; padding: 13px 20px;
+      border-radius: 10px; font-size: 14px; font-weight: 700; transition: all .2s;
+    }
+    .btn-wa-confirm:hover { background: #16A34A; }
+    .btn-seguir {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      background: var(--gray-100); color: var(--gray-700); padding: 13px 20px;
+      border-radius: 10px; font-size: 14px; font-weight: 700; transition: all .2s;
+    }
+    .btn-seguir:hover { background: var(--gray-200); }
+
+    @media (max-width: 820px) {
+      .checkout-grid { grid-template-columns: 1fr; }
+      .order-col { order: 2; }
+      .form-col { order: 1; }
+      .confirm-actions { flex-direction: column; }
+    }
+    @media (max-width: 500px) {
+      .form-row { grid-template-columns: 1fr; }
+      .checkout-grid { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="spectrum"></div>
+
+<header>
+  <div class="nav-inner">
+    <a href="index.html" class="logo"><img src="logo.webp" alt="Química Color" /></a>
+    <a href="productos.html" class="back-link">← Volver al catálogo</a>
+  </div>
+</header>
+
+<!-- ESTADO VACÍO -->
+<div id="emptyState" class="empty-state" style="display:none;">
+  <div class="empty-icon">🛒</div>
+  <h2>Tu carrito está vacío</h2>
+  <p>Todavía no agregaste ningún producto al pedido. Explorá el catálogo y agregá lo que necesitás.</p>
+  <a href="productos.html" class="btn-primary">Ver catálogo de productos →</a>
+</div>
+
+<!-- CHECKOUT PRINCIPAL -->
+<div id="checkoutMain">
+  <div class="page-header">
+    <div class="page-title">Hacer pedido</div>
+    <div class="page-sub">Completá tus datos y te enviamos el presupuesto por WhatsApp.</div>
+  </div>
+
+  <div class="checkout-grid">
+
+    <!-- COLUMNA IZQUIERDA: Resumen del pedido + Datos bancarios -->
+    <div class="order-col">
+      <div style="position:sticky; top:88px; display:flex; flex-direction:column; gap:16px;">
+        <div class="card">
+          <div class="card-head">
+            <h2>Tu pedido</h2>
+            <button class="vaciar-link" onclick="vaciarCarrito()">Vaciar carrito</button>
+          </div>
+          <div class="card-body">
+            <div class="order-items" id="orderItems"></div>
+          </div>
+          <div id="orderTotal"></div>
+          <div class="order-summary-foot">
+            <div class="order-count" id="orderCount"></div>
+            <div id="dolarTotalARS" style="display:none;font-size:13px;color:#15803d;font-weight:700;margin-top:4px;">
+              ≈ <span id="dolarTotalVal"></span> ARS
+              <span style="font-size:10px;font-weight:400;color:#6b7280;">(dólar oficial venta)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DATOS BANCARIOS -->
+        <div class="bank-card">
+          <div class="bank-card-head">🏦 Pagá por transferencia bancaria</div>
+          <div class="bank-rows">
+            <div class="bank-row">
+              <span class="bank-row-label">Banco</span>
+              <span class="bank-row-value">BBVA Argentina S.A.</span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">Cuenta</span>
+              <span class="bank-row-value">CA $ 328-342344/7</span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">CBU</span>
+              <span style="display:flex;align-items:center;gap:8px;">
+                <span class="bank-row-value" id="bankCBU2">0170328140000034234477</span>
+                <button class="copy-btn" onclick="copiar('bankCBU2')">copiar</button>
+              </span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">Alias</span>
+              <span style="display:flex;align-items:center;gap:8px;">
+                <span class="bank-row-value" id="bankAlias2">FedeNucaraBBVA</span>
+                <button class="copy-btn" onclick="copiar('bankAlias2')">copiar</button>
+              </span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">Titular</span>
+              <span class="bank-row-value">Federico Javier Nucara</span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">CUIL</span>
+              <span class="bank-row-value">20-32359997-2</span>
+            </div>
+          </div>
+          <div id="dolarBox" style="margin:12px 0 4px;padding:12px 16px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;display:none;">
+            <div style="font-size:11px;font-weight:700;color:#15803d;letter-spacing:.5px;margin-bottom:6px;">💵 DÓLAR OFICIAL HOY</div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <span style="font-size:13px;color:#374151;">Compra: <strong id="dolarCompra" style="color:#15803d;">—</strong></span>
+              <span style="font-size:13px;color:#374151;">Venta: <strong id="dolarVenta" style="color:#15803d;">—</strong></span>
+            </div>
+            <div style="font-size:10px;color:#9ca3af;margin-top:6px;" id="dolarFecha"></div>
+          </div>
+          <div class="bank-note">
+            ⚠️ <strong>Importante:</strong> enviá el comprobante por WhatsApp junto con tu pedido para agilizar la confirmación.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Formulario + Confirmación -->
+    <div class="form-col">
+
+      <!-- FORMULARIO -->
+      <div id="formSection">
+        <div class="card">
+          <div class="card-head">
+            <h2>Datos de envío</h2>
+          </div>
+          <div class="card-body">
+            <form id="checkoutForm" onsubmit="submitOrder(event)">
+              <div class="form-section">
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="fNombre">Nombre completo</label>
+                    <input type="text" id="fNombre" required placeholder="Juan García" autocomplete="name" />
+                  </div>
+                  <div class="form-group">
+                    <label for="fDni">DNI / CUIT</label>
+                    <input type="text" id="fDni" required placeholder="20-12345678-9" autocomplete="off" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="fEmpresa">Empresa / Razón social <span class="optional-tag">opcional</span></label>
+                  <input type="text" id="fEmpresa" placeholder="Mi Empresa SA" autocomplete="organization" />
+                </div>
+
+                <div class="form-group">
+                  <label for="fDireccion">Dirección</label>
+                  <input type="text" id="fDireccion" required placeholder="Av. Corrientes 1234, Piso 2 Dto B" autocomplete="street-address" />
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="fCiudad">Ciudad / Localidad</label>
+                    <input type="text" id="fCiudad" required placeholder="Buenos Aires" autocomplete="address-level2" />
+                  </div>
+                  <div class="form-group">
+                    <label for="fProvincia">Provincia</label>
+                    <select id="fProvincia" required>
+                      <option value="">Seleccioná...</option>
+                      <option>Buenos Aires</option>
+                      <option>Ciudad Autónoma de Buenos Aires</option>
+                      <option>Catamarca</option>
+                      <option>Chaco</option>
+                      <option>Chubut</option>
+                      <option>Córdoba</option>
+                      <option>Corrientes</option>
+                      <option>Entre Ríos</option>
+                      <option>Formosa</option>
+                      <option>Jujuy</option>
+                      <option>La Pampa</option>
+                      <option>La Rioja</option>
+                      <option>Mendoza</option>
+                      <option>Misiones</option>
+                      <option>Neuquén</option>
+                      <option>Río Negro</option>
+                      <option>Salta</option>
+                      <option>San Juan</option>
+                      <option>San Luis</option>
+                      <option>Santa Cruz</option>
+                      <option>Santa Fe</option>
+                      <option>Santiago del Estero</option>
+                      <option>Tierra del Fuego</option>
+                      <option>Tucumán</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="fCP">Código postal <span class="optional-tag">opcional</span></label>
+                    <input type="text" id="fCP" placeholder="1043" autocomplete="postal-code" />
+                  </div>
+                  <div class="form-group">
+                    <label for="fTelefono">Teléfono / WhatsApp</label>
+                    <input type="tel" id="fTelefono" required placeholder="11 4567-8901" autocomplete="tel" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="fTransporte">Transporte de preferencia <span class="optional-tag">opcional</span></label>
+                  <input type="text" id="fTransporte" placeholder="Ej: OCA, Andreani, Via Cargo, Retiro en planta..." autocomplete="off" />
+                  <p style="margin:4px 0 0;font-size:12px;color:#6b7280;">El envío se despacha con pago en destino.</p>
+                </div>
+
+                <div class="form-group">
+                  <label for="fEmail">Email <span class="optional-tag">opcional</span></label>
+                  <input type="email" id="fEmail" placeholder="tu@email.com" autocomplete="email" />
+                </div>
+
+                <div class="form-group">
+                  <label for="fNotas">Notas / aclaraciones <span class="optional-tag">opcional</span></label>
+                  <textarea id="fNotas" placeholder="Instrucciones de entrega, urgencia, aclaraciones sobre los productos..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                  💬 Enviar pedido por WhatsApp
+                </button>
+                <p class="form-legal">Al enviar aceptás que nos contactemos con vos para coordinar precio, pago y entrega.</p>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIRMACIÓN (se muestra después de enviar) -->
+      <div id="confirmacion">
+        <div class="confirm-hero">
+          <div class="confirm-icon">✅</div>
+          <h2>¡Pedido enviado!</h2>
+          <p>Tu pedido fue enviado por WhatsApp. Te respondemos a la brevedad con precio y disponibilidad.</p>
+        </div>
+
+        <div class="bank-card">
+          <div class="bank-card-head">🏦 Datos bancarios (para cuando confirmemos el pedido)</div>
+          <div class="bank-rows">
+            <div class="bank-row">
+              <span class="bank-row-label">Banco</span>
+              <span class="bank-row-value" id="bankNombre"></span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">Cuenta</span>
+              <span class="bank-row-value" id="bankCuenta"></span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">CBU</span>
+              <span>
+                <span class="bank-row-value" id="bankCBU"></span>
+                <button class="copy-btn" onclick="copiar('bankCBU')">copiar</button>
+              </span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">Alias</span>
+              <span>
+                <span class="bank-row-value" id="bankAlias"></span>
+                <button class="copy-btn" onclick="copiar('bankAlias')">copiar</button>
+              </span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">Titular</span>
+              <span class="bank-row-value" id="bankTitular"></span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-row-label">CUIL</span>
+              <span class="bank-row-value" id="bankCuil"></span>
+            </div>
+          </div>
+          <div class="bank-note">
+            ⚠️ <strong>Importante:</strong> no realices la transferencia hasta que confirmemos el monto total por WhatsApp.
+          </div>
+        </div>
+
+        <div class="confirm-actions">
+          <a id="waConfirmBtn" href="#" target="_blank" class="btn-wa-confirm">
+            💬 Abrir WhatsApp de nuevo
+          </a>
+          <a href="productos.html" class="btn-seguir">
+            + Seguir comprando
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ⚙️ CONFIGURAR: completar con los datos bancarios reales
+  const BANCO = {
+    nombre:   'BBVA Argentina S.A.',
+    cuenta:   'CA $ 328-342344/7',
+    cbu:      '0170328140000034234477',
+    alias:    'FedeNucaraBBVA',
+    titular:  'Federico Javier Nucara',
+    cuil:     '20-32359997-2',
+  };
+
+  const WA_NUMBER = '5491137608638';
+
+  // ── CARRITO ────────────────────────────────────────────────────
+  let carrito = JSON.parse(localStorage.getItem('qc_carrito') || '[]');
+
+  function saveCarrito() { localStorage.setItem('qc_carrito', JSON.stringify(carrito)); }
+
+  function changeQty(id, delta) {
+    const item = carrito.find(i => i.id === id);
+    if (!item) return;
+    item.cantidad += delta;
+    if (item.cantidad <= 0) carrito = carrito.filter(i => i.id !== id);
+    saveCarrito();
+    if (carrito.length === 0) { location.href = 'productos.html'; return; }
+    renderOrder();
+  }
+
+  function removeItem(id) {
+    carrito = carrito.filter(i => i.id !== id);
+    saveCarrito();
+    if (carrito.length === 0) { location.href = 'productos.html'; return; }
+    renderOrder();
+  }
+
+  function vaciarCarrito() {
+    if (!confirm('¿Vaciar el carrito?')) return;
+    localStorage.removeItem('qc_carrito');
+    location.href = 'productos.html';
+  }
+
+  // ── RENDERIZADO ────────────────────────────────────────────────
+  function fmt(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
+
+  function renderOrder() {
+    const el = document.getElementById('orderItems');
+    el.innerHTML = carrito.map(item => {
+      const thumb = item.imagen
+        ? `<img class="order-item-img" src="${item.imagen}" alt="${item.nombre}" onerror="this.style.display='none'">`
+        : `<div class="order-item-thumb">📦</div>`;
+      const precioTotal = item.precio != null ? item.precio * item.cantidad : null;
+      const precioHTML = precioTotal != null
+        ? `<div class="order-item-price">
+            ${item.variante ? `<span style="font-size:12px;font-weight:600;color:var(--gray-500);margin-right:6px;">${item.variante}</span>` : ''}
+            ${fmt(precioTotal)}
+            ${item.cantidad > 1 ? `<span style="font-size:11px;font-weight:500;color:var(--gray-500);"> (${item.cantidad} × ${fmt(item.precio)})</span>` : ''}
+           </div>`
+        : `<div class="order-item-price-na">${item.variante ? item.variante + ' — ' : ''}Precio a consultar</div>`;
+      return `<div class="order-item">
+        ${thumb}
+        <div class="order-item-info">
+          <div class="order-item-name">${item.nombre}</div>
+          <div class="order-item-cat">${item.subcategoria}</div>
+          ${precioHTML}
+          <div class="qty-row">
+            <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+            <span class="qty-num">${item.cantidad}</span>
+            <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+            <button class="item-del" onclick="removeItem('${item.id}')" title="Eliminar">🗑</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const cantTotal   = carrito.reduce((s, i) => s + i.cantidad, 0);
+    const conPrecio   = carrito.filter(i => i.precio != null);
+    const sinPrecio   = carrito.filter(i => i.precio == null);
+    const subtotal    = conPrecio.reduce((s, i) => s + i.precio * i.cantidad, 0);
+    const todosConPrecio = sinPrecio.length === 0;
+
+    document.getElementById('orderCount').textContent =
+      `${cantTotal} producto${cantTotal !== 1 ? 's' : ''} seleccionado${cantTotal !== 1 ? 's' : ''}`;
+
+    const totalEl = document.getElementById('orderTotal');
+    if (conPrecio.length > 0) {
+      totalEl.innerHTML = `
+        <div class="order-total">
+          <div>
+            <div class="order-total-label">${todosConPrecio ? 'Total' : 'Subtotal'}</div>
+            ${!todosConPrecio ? `<div class="order-total-partial">+ ${sinPrecio.length} producto${sinPrecio.length>1?'s':''} a confirmar precio</div>` : ''}
+          </div>
+          <div class="order-total-value">${fmt(subtotal)}</div>
+        </div>`;
+    } else {
+      totalEl.innerHTML = '';
+    }
+  }
+
+  // ── DÓLAR OFICIAL ──────────────────────────────────────────────
+  function cargarDolar() {
+    fetch('https://dolarapi.com/v1/dolares/oficial')
+      .then(r => r.json())
+      .then(d => {
+        const venta   = d.venta;
+        const compra  = d.compra;
+        const fmt$    = v => '$ ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+        document.getElementById('dolarCompra').textContent = fmt$(compra);
+        document.getElementById('dolarVenta').textContent  = fmt$(venta);
+        const fecha = new Date(d.fechaActualizacion);
+        document.getElementById('dolarFecha').textContent =
+          'Actualizado: ' + fecha.toLocaleDateString('es-AR') + ' ' + fecha.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
+        document.getElementById('dolarBox').style.display = 'block';
+        // Mostrar total del pedido en ARS si hay precios en USD
+        const conPrecio = carrito.filter(i => i.precio != null);
+        if (conPrecio.length > 0) {
+          const subtotalUSD = conPrecio.reduce((s, i) => s + i.precio * i.cantidad, 0);
+          const totalARS    = subtotalUSD * venta;
+          document.getElementById('dolarTotalVal').textContent =
+            '$ ' + Number(totalARS).toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
+          document.getElementById('dolarTotalARS').style.display = 'block';
+        }
+      })
+      .catch(() => {}); // Si falla la API, no mostrar nada
+  }
+
+  // ── INIT ───────────────────────────────────────────────────────
+  if (carrito.length === 0) {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('checkoutMain').style.display = 'none';
+  } else {
+    renderOrder();
+    cargarDolar();
+    // Cargar datos bancarios en la sección de confirmación
+    document.getElementById('bankNombre').textContent  = BANCO.nombre;
+    document.getElementById('bankCuenta').textContent  = BANCO.cuenta;
+    document.getElementById('bankCBU').textContent     = BANCO.cbu;
+    document.getElementById('bankAlias').textContent   = BANCO.alias;
+    document.getElementById('bankTitular').textContent = BANCO.titular;
+    document.getElementById('bankCuil').textContent    = BANCO.cuil;
+  }
+
+  // ── SUBMIT ─────────────────────────────────────────────────────
+  function submitOrder(e) {
+    e.preventDefault();
+
+    const nombre   = document.getElementById('fNombre').value.trim();
+    const dni      = document.getElementById('fDni').value.trim();
+    const empresa  = document.getElementById('fEmpresa').value.trim();
+    const dir      = document.getElementById('fDireccion').value.trim();
+    const ciudad   = document.getElementById('fCiudad').value.trim();
+    const prov     = document.getElementById('fProvincia').value;
+    const cp       = document.getElementById('fCP').value.trim();
+    const tel      = document.getElementById('fTelefono').value.trim();
+    const email      = document.getElementById('fEmail').value.trim();
+    const transporte = document.getElementById('fTransporte').value.trim();
+    const notas      = document.getElementById('fNotas').value.trim();
+
+    const lineasProd = carrito.map(i => {
+      let linea = `• ${i.nombre}${i.cantidad > 1 ? ' (×' + i.cantidad + ')' : ''}`;
+      if (i.precio != null) linea += ` — ${fmt(i.precio * i.cantidad)}`;
+      return linea;
+    }).join('\n');
+
+    const conPrecio = carrito.filter(i => i.precio != null);
+    const subtotal  = conPrecio.reduce((s, i) => s + i.precio * i.cantidad, 0);
+    const hayTotal  = conPrecio.length > 0;
+    const todosTienen = carrito.every(i => i.precio != null);
+
+    let msg = `Hola Química Color! Quiero hacer el siguiente pedido:\n\n`;
+    msg += `*PRODUCTOS:*\n${lineasProd}\n`;
+    if (hayTotal) {
+      msg += todosTienen
+        ? `\n*TOTAL: ${fmt(subtotal)}*\n\n`
+        : `\n*Subtotal: ${fmt(subtotal)}* (+ productos a confirmar precio)\n\n`;
+    } else {
+      msg += `\n`;
+    }
+    msg += `*DATOS DE ENVÍO:*\n`;
+    msg += `Nombre: ${nombre}\n`;
+    msg += `DNI/CUIT: ${dni}\n`;
+    if (empresa) msg += `Empresa: ${empresa}\n`;
+    msg += `Dirección: ${dir}\n`;
+    msg += `Ciudad: ${ciudad}, ${prov}`;
+    if (cp) msg += ` — CP ${cp}`;
+    msg += `\nTeléfono: ${tel}`;
+    if (email) msg += `\nEmail: ${email}`;
+    if (transporte) msg += `\nTransporte: ${transporte}`;
+    if (notas) msg += `\n\nNotas: ${notas}`;
+    msg += `\n\nAguardo confirmación. ¡Gracias!`;
+
+    const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+
+    // Guardar URL para el botón "Abrir WhatsApp de nuevo"
+    document.getElementById('waConfirmBtn').href = waUrl;
+
+    // Abrir WhatsApp
+    window.open(waUrl, '_blank');
+
+    // Descontar stock por cada item del pedido
+    try {
+      const stockData = JSON.parse(localStorage.getItem('qc_stock') || '{}');
+      carrito.forEach(item => {
+        if (item.id in stockData) {
+          stockData[item.id] = Math.max(0, Number(stockData[item.id]) - item.cantidad);
+        }
+      });
+      localStorage.setItem('qc_stock', JSON.stringify(stockData));
+    } catch(e) {}
+
+    // Limpiar carrito y mostrar confirmación
+    localStorage.removeItem('qc_carrito');
+    document.getElementById('formSection').style.display = 'none';
+    document.getElementById('confirmacion').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── COPIAR AL PORTAPAPELES ─────────────────────────────────────
+  function copiar(id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector(`#${id} ~ .copy-btn`) ||
+                  document.querySelector(`[onclick="copiar('${id}')"]`);
+      if (btn) { btn.textContent = '✓ copiado'; setTimeout(() => { btn.textContent = 'copiar'; }, 1500); }
+    });
+  }
+</script>
+</body>
+</html>
