@@ -901,8 +901,17 @@ function openCart() {
 }
 
 function _showCartError(msg) {
-  const el = document.getElementById('cartErrorDyn');
-  if (!el) return;
+  let el = document.getElementById('cartErrorDyn');
+  if (!el) {
+    // El carrito está cerrado: aviso flotante abajo de la pantalla
+    el = document.getElementById('cartToastDyn');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'cartToastDyn';
+      el.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;max-width:min(92vw,480px);padding:12px 16px;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;color:#dc2626;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.15);display:none;';
+      document.body.appendChild(el);
+    }
+  }
   el.textContent = msg;
   el.style.display = 'block';
   clearTimeout(el._t);
