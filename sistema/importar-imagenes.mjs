@@ -37,12 +37,15 @@ for (const f of archivos) {
   if (aplicar) {
     const buf = await sharp(path.join(carpeta, f)).flatten({ background: '#ffffff' })
       .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
-    if (!esVsl && prod.imagen && prod.imagen !== destino && fs.existsSync(path.join(root, prod.imagen))) {
+    // La imagen anterior se guarda en imgs/_anteriores una sola vez: si ya hay un respaldo
+    // de ese producto, no se pisa (así re-correr el importador no borra la foto original).
+    const actual = !esVsl && prod.imagen && fs.existsSync(path.join(root, prod.imagen)) ? prod.imagen
+                 : !esVsl && fs.existsSync(path.join(root, destino)) ? destino : null;
+    if (actual) {
+      const respaldo = path.join(root, 'imgs/_anteriores', path.basename(actual));
       fs.mkdirSync(path.join(root, 'imgs/_anteriores'), { recursive: true });
-      fs.renameSync(path.join(root, prod.imagen), path.join(root, 'imgs/_anteriores', path.basename(prod.imagen)));
-    } else if (!esVsl && fs.existsSync(path.join(root, destino))) {
-      fs.mkdirSync(path.join(root, 'imgs/_anteriores'), { recursive: true });
-      fs.copyFileSync(path.join(root, destino), path.join(root, 'imgs/_anteriores', path.basename(destino)));
+      if (!fs.existsSync(respaldo)) fs.copyFileSync(path.join(root, actual), respaldo);
+      if (actual !== destino) fs.unlinkSync(path.join(root, actual));
     }
     fs.writeFileSync(path.join(root, destino), buf);
     if (!esVsl) nuevaRuta[prod.id] = destino;
