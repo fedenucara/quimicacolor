@@ -274,6 +274,7 @@
     .pm-badge-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .pm-sub { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .pm-name { font-size: 22px; font-weight: 900; color: var(--gray-900); line-height: 1.2; }
+    .subcat-desc { font-size: 13px; color: var(--gray-500); line-height: 1.5; margin: -6px 0 12px; max-width: 720px; }
     .pm-sku { font-size: 12px; font-weight: 600; color: var(--gray-500); font-family: ui-monospace, Consolas, monospace; letter-spacing: .3px; }
     .pm-desc { font-size: 14px; color: var(--gray-500); line-height: 1.65; white-space: pre-wrap; }
     .pm-fichas { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
@@ -512,6 +513,24 @@ let _datosDesdeLocal = false;
 })();
 
 // ── RENDER CATALOG ────────────────────────────────────────────────────────────
+// Una línea por familia con para qué se usa. Tomado de las fichas técnicas de cada familia.
+const FAMILIA_INFO = {
+  'colorantes/Ácidos':      'Solubles en agua. Tintas de impresión, escritura y dibujo, coloración capilar, productos de limpieza y detergentes.',
+  'colorantes/Reactivos':   'Teñido y estampado de fibras celulósicas (algodón, viscosa), tintas acuosas y productos de limpieza.',
+  'colorantes/Básicos':     'Tintas de escritura y dibujo, teñido de papel, cuero, seda y fibras acrílicas, pinturas y espirales.',
+  'colorantes/A la Grasa':  'Solubles en aceites y solventes. Combustibles y aceites minerales, ceras, velas, grasas, betunes, barnices y lacas.',
+  'colorantes/Directos':    'Teñido de papel y cartón, fibras celulósicas (algodón, viscosa) y tintas acuosas.',
+  'colorantes/Otros':       'Colorantes líquidos base agua, listos para dosificar sin disolver. Mismos usos que su versión en polvo.',
+  'dispersiones/Dispersión':   'Pastas pigmentarias concentradas. Entonado de pinturas al látex y base agua, tintas acuosas y flexográficas, estampación textil y pintura artística. La versión en vaselina es para ceras, parafinas, velas y cosmética no facial.',
+  'dispersiones/Fluorescente': 'Pinturas y tintas fluorescentes base agua, estampación textil, artículos de librería y manualidades.',
+  'pigmentos/Orgánico':     'Pigmentos en polvo de alta intensidad. Tintas base solvente y agua, pinturas base agua, plásticos, caucho y recubrimientos.',
+  'pigmentos/Inorgánico':   'Pigmentos minerales de gran solidez a la luz y poder cubritivo. Pinturas, revestimientos, plásticos y materiales de construcción.',
+  'pigmentos/Fosforescente':'Acumula luz y brilla en la oscuridad. Pinturas, señalización, plásticos y manualidades.',
+  'pigmentos/Perlado':      'Efecto nacarado y metálico. Pinturas decorativas, artísticas y automotrices, tintas y serigrafía, plásticos y masterbatch.',
+  'pigmentos/Fluorescente': 'Pigmentos fluo en polvo. Pinturas y tintas, plásticos, estampación textil, librería y manualidades.',
+  'aditivos/Aditivo':       'Auxiliares para pinturas y tintas base agua: espesantes, antiespumantes, antiflotantes, dispersantes, blanqueadores ópticos y biocidas. Se dosifican en porcentajes bajos sobre el total del sistema.',
+};
+
 function renderCatalog() {
   const byCat = {};
   CAT_ORDER.forEach(c => { byCat[c] = {}; });
@@ -536,7 +555,8 @@ function renderCatalog() {
     const SUB_ORDER = { colorantes:['Ácidos','Reactivos','Básicos','A la Grasa','Directos','Otros'], dispersiones:['Dispersión','Fluorescente'], pigmentos:['Orgánico','Inorgánico','Fosforescente','Perlado','Fluorescente'], aditivos:['Aditivo'] }[cat] || [];
     const subsOrdenadas = Object.entries(subs).sort(([a],[b]) => { const ia = SUB_ORDER.indexOf(a), ib = SUB_ORDER.indexOf(b); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
     for (const [sub, prods] of subsOrdenadas) {
-      html += `<div class="subcat"><div class="subcat-label">${sub}</div><div class="prod-grid">`;
+      const info = FAMILIA_INFO[cat + '/' + sub];
+      html += `<div class="subcat"><div class="subcat-label">${sub}</div>${info ? `<div class="subcat-desc">${info}</div>` : ''}<div class="prod-grid">`;
       prods.sort((a,b) => (esLiquido(a)?1:0) - (esLiquido(b)?1:0) || a.nombre.localeCompare(b.nombre, 'es', { numeric: true })).forEach(p => { html += prodCardHTML(p); });
       html += `</div></div>`;
     }
