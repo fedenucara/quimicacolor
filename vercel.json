@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/colorantes",   "destination": "/productos#colorantes",   "permanent": true },
+    { "source": "/dispersiones", "destination": "/productos#dispersiones", "permanent": true },
+    { "source": "/pigmentos",    "destination": "/productos#pigmentos",    "permanent": true },
+    { "source": "/aditivos",     "destination": "/productos#aditivos",     "permanent": true },
+    { "source": "/trabajos",     "destination": "/#nosotros",              "permanent": true },
+    { "source": "/informacion",  "destination": "/#contacto",              "permanent": true },
+    { "source": "/tienda",       "destination": "/productos",              "permanent": false }
+  ],
+  "headers": [
+    { "source": "/imgs/(.*)",   "headers": [ { "key": "Cache-Control", "value": "public, max-age=604800" } ] },
+    { "source": "/fichas/(.*)", "headers": [ { "key": "Cache-Control", "value": "public, max-age=86400" }, { "key": "Content-Disposition", "value": "inline" } ] },
+    { "source": "/(.*)",        "headers": [ { "key": "X-Content-Type-Options", "value": "nosniff" } ] }
+  ]
+}

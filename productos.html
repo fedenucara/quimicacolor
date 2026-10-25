@@ -545,7 +545,7 @@ function renderCatalog() {
     const subs = byCat[cat];
     const meta = CAT_META[cat];
     const total = Object.values(subs).reduce((s, a) => s + a.length, 0);
-    html += `<div class="cat-block" data-cat="${cat}">
+    html += `<div class="cat-block" id="${cat}" data-cat="${cat}">
       <div class="cat-title">
         <div class="cat-title-icon">${meta.icon}</div>
         <h2>${meta.label}</h2>
@@ -1411,6 +1411,10 @@ function admResizeWatermark(file, conMarca) {
 
 <!-- ADMIN TRIGGER -->
 <button class="admin-trigger" onclick="openAdminLogin()" title="Acceso administrador">⚙️</button>
+<script>
+  // El admin solo sirve en la PC de Federico (escribe archivos locales): en la web publicada no se muestra.
+  if (location.protocol !== "file:" && !/^(localhost|127.0.0.1)$/.test(location.hostname)) document.querySelector(".admin-trigger").style.display = "none";
+</script>
 
 <!-- ADMIN LOGIN MODAL -->
 <div id="adm-login">
