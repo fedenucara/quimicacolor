@@ -266,6 +266,24 @@
       background: var(--gray-100); border-radius: 18px 0 0 18px; overflow: hidden;
     }
     .pm-img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 12px; box-sizing: border-box; }
+    .pm-gal { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+    .pm-gal-strip { flex: 1; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .pm-gal-strip::-webkit-scrollbar { display: none; }
+    .pm-gal-strip .pm-img { flex: 0 0 100%; width: 100%; height: 100%; scroll-snap-align: start; cursor: zoom-in; }
+    .pm-gal-thumbs { display: flex; gap: 6px; padding: 0 10px 10px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+    .pm-gal-thumbs::-webkit-scrollbar { display: none; }
+    .pm-thumb { width: 46px; height: 46px; flex: 0 0 auto; border: 2px solid transparent; border-radius: 8px; padding: 0; background: #fff; cursor: pointer; overflow: hidden; opacity: .7; }
+    .pm-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pm-thumb.act { border-color: var(--gray-900); opacity: 1; }
+    #pm-lb { position: fixed; inset: 0; background: rgba(0,0,0,.92); z-index: 10001; display: none; align-items: center; justify-content: center; }
+    #pm-lb.open { display: flex; }
+    #pm-lb img { max-width: 96vw; max-height: 92vh; object-fit: contain; border-radius: 8px; background: #fff; }
+    .pm-lb-btn { position: absolute; background: rgba(255,255,255,.15); color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 26px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .pm-lb-btn:hover { background: rgba(255,255,255,.3); }
+    .pm-lb-close { top: 14px; right: 14px; font-size: 18px; }
+    .pm-lb-prev { left: 10px; top: 50%; transform: translateY(-50%); }
+    .pm-lb-next { right: 10px; top: 50%; transform: translateY(-50%); }
+    .pm-lb-cnt { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,.8); font-size: 13px; font-weight: 600; }
     .pm-img-ph {
       width: 100%; height: 100%; min-height: 320px;
       display: flex; align-items: center; justify-content: center; font-size: 64px;
@@ -296,6 +314,8 @@
       .pm-body { grid-template-columns: 1fr; }
       .pm-img-col { border-radius: 18px 18px 0 0; }
       .pm-img { aspect-ratio: 4/3; height: auto; }
+      .pm-gal { height: auto; }
+      .pm-gal-strip { flex: none; }
       .pm-img-ph { min-height: 180px; aspect-ratio: 4/3; height: auto; }
     }
 
@@ -624,8 +644,14 @@ function openProductDetail(id) {
   const badgeClass = { stock:'badge-stock', nostock:'badge-nostock', consultar:'badge-consultar' }[p.stock];
   const badgeLabel = { stock:'En stock', nostock:'Sin stock', consultar:'Consultar' }[p.stock];
 
-  const imgHTML = p.imagen
-    ? `<img class="pm-img" src="${p.imagen}" alt="${p.nombre}" onerror="this.outerHTML='<div class=pm-img-ph>📷</div>'">`
+  // Galería: "imagenes" (array) si existe; si no, la imagen principal sola. Preparada para cualquier cantidad.
+  const fotos = (p.imagenes && p.imagenes.length) ? p.imagenes : (p.imagen ? [p.imagen] : []);
+  _fotosActuales = fotos;
+  const imgHTML = fotos.length
+    ? `<div class="pm-gal">
+        <div class="pm-gal-strip" id="pm-gal-strip" onscroll="_galScroll()">${fotos.map((src, i) => `<img class="pm-img" src="${src}" alt="${p.nombre}${i ? ' · imagen ' + (i + 1) : ''}" loading="${i ? 'lazy' : 'eager'}" onclick="abrirFoto(${i})" onerror="this.style.display='none'">`).join('')}</div>
+        ${fotos.length > 1 ? `<div class="pm-gal-thumbs" id="pm-gal-thumbs">${fotos.map((src, i) => `<button class="pm-thumb${i === 0 ? ' act' : ''}" onclick="irFoto(${i})" aria-label="Imagen ${i + 1}"><img src="${src}" alt=""></button>`).join('')}</div>` : ''}
+      </div>`
     : `<div class="pm-img-ph">📷</div>`;
 
   const fmtP = v => v != null ? `<span class="pm-price-val">USD ${Number(v).toLocaleString('en-US')}</span><span style="font-size:13px;font-weight:400;color:var(--gray-500);margin-left:4px;">/kg + IVA</span>` : `<span class="pm-price-consultar">No disponible</span>`;
@@ -682,6 +708,60 @@ function openProductDetail(id) {
   document.getElementById('prod-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
+
+// ── GALERÍA DEL DETALLE ──────────────────────────────────────────────────────
+let _fotosActuales = [];
+let _fotoVisor = 0;
+function irFoto(i) {
+  const strip = document.getElementById('pm-gal-strip'); if (!strip) return;
+  strip.scrollTo({ left: i * strip.clientWidth, behavior: 'smooth' });
+  _galMarcar(i);
+}
+function _galMarcar(i) {
+  document.querySelectorAll('#pm-gal-thumbs .pm-thumb').forEach((b, k) => b.classList.toggle('act', k === i));
+}
+function _galScroll() {
+  const strip = document.getElementById('pm-gal-strip'); if (!strip || !strip.clientWidth) return;
+  _galMarcar(Math.round(strip.scrollLeft / strip.clientWidth));
+}
+// Visor: la imagen a pantalla completa (para leer la ficha simple)
+function abrirFoto(i) {
+  if (!_fotosActuales.length) return;
+  let lb = document.getElementById('pm-lb');
+  if (!lb) {
+    lb = document.createElement('div'); lb.id = 'pm-lb';
+    lb.innerHTML = `<button class="pm-lb-btn pm-lb-close" onclick="cerrarFoto()" aria-label="Cerrar">✕</button>
+      <button class="pm-lb-btn pm-lb-prev" onclick="moverFoto(-1)" aria-label="Anterior">‹</button>
+      <img id="pm-lb-img" src="" alt="">
+      <button class="pm-lb-btn pm-lb-next" onclick="moverFoto(1)" aria-label="Siguiente">›</button>
+      <div class="pm-lb-cnt" id="pm-lb-cnt"></div>`;
+    lb.addEventListener('click', e => { if (e.target === lb) cerrarFoto(); });
+    let x0 = null;
+    lb.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) moverFoto(dx < 0 ? 1 : -1); x0 = null; });
+    document.body.appendChild(lb);
+  }
+  _fotoVisor = i; _visorPintar();
+  lb.classList.add('open');
+}
+function _visorPintar() {
+  const n = _fotosActuales.length;
+  document.getElementById('pm-lb-img').src = _fotosActuales[_fotoVisor];
+  document.getElementById('pm-lb-cnt').textContent = n > 1 ? (_fotoVisor + 1) + ' / ' + n : '';
+  document.querySelector('.pm-lb-prev').style.display = n > 1 ? '' : 'none';
+  document.querySelector('.pm-lb-next').style.display = n > 1 ? '' : 'none';
+}
+function moverFoto(d) {
+  const n = _fotosActuales.length; if (!n) return;
+  _fotoVisor = (_fotoVisor + d + n) % n; _visorPintar(); irFoto(_fotoVisor);
+}
+function cerrarFoto() { const lb = document.getElementById('pm-lb'); if (lb) lb.classList.remove('open'); }
+document.addEventListener('keydown', e => {
+  const lb = document.getElementById('pm-lb'); if (!lb || !lb.classList.contains('open')) return;
+  if (e.key === 'Escape') { cerrarFoto(); e.stopImmediatePropagation(); }
+  else if (e.key === 'ArrowLeft') moverFoto(-1);
+  else if (e.key === 'ArrowRight') moverFoto(1);
+}, true);
 
 function closeProductModal() {
   document.getElementById('prod-modal').classList.remove('open');
@@ -1116,6 +1196,7 @@ function saveLocalOverride() {
 function _serializarProductos() {
   return DATOS.map(p => {
     const img     = p.imagen      ? `"${p.imagen}"`      : 'null';
+    const imgs    = (p.imagenes && p.imagenes.length) ? `, imagenes:${JSON.stringify(p.imagenes)}` : '';
     const precio   = p.precio    != null ? p.precio    : 'null';
     const precio4  = p.precio4   != null ? p.precio4   : 'null';
     const precio5  = p.precio5   != null ? p.precio5   : 'null';
@@ -1127,15 +1208,15 @@ function _serializarProductos() {
     const fichas  = (p.fichas && p.fichas.length) ? `, fichas:${JSON.stringify(p.fichas)}` : '';
     const sku     = (p.sku ? `, sku:"${p.sku}"` : '') + (p.skuVsl ? `, skuVsl:"${p.skuVsl}"` : '') + (p.maxKg != null ? `, maxKg:${p.maxKg}` : '') + (p.liquido ? ', liquido:true' : '');
     if (p.id === 'aditivo-opacante') {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}${fichas}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}${imgs}, precio5:${precio5}, precio10:${precio10}, precio20:${precio20}, precio200:${precio200}${fichas}, descripcion:${desc} }`;
     }
     if (esLiquido(p)) {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio:${precio}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}${imgs}, precio:${precio}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
     }
     if (p.categoria === 'dispersiones') {
-      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio:${precio}, precio4:${precio4}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
+      return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}${imgs}, precio:${precio}, precio4:${precio4}, precio5:${precio5}, precio20:${precio20}${fichas}, descripcion:${desc} }`;
     }
-    return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}, precio:${precio}, precio5:${precio5}, precio25:${precio25}${fichas}, descripcion:${desc} }`;
+    return `  { id:"${p.id}", nombre:"${p.nombre}", categoria:"${p.categoria}", subcategoria:"${p.subcategoria}", stock:"${p.stock}"${sku}, imagen:${img}${imgs}, precio:${precio}, precio5:${precio5}, precio25:${precio25}${fichas}, descripcion:${desc} }`;
   });
 }
 
