@@ -28,7 +28,8 @@ const publicadas = [], vsl = [], sinProducto = [];
 const nuevaRuta = {};
 for (const f of archivos) {
   const sku = f.split(' - ')[0].trim().toUpperCase();
-  const p = porSku.get(sku);
+  // Coincide por sku, por skuVsl o, para productos sin código, por el id de la ficha (ej. "aditivo-opacante - Opacante.png")
+  const p = porSku.get(sku) || P.find(x => x.id.toUpperCase() === sku);
   const pv = porSkuVsl.get(sku);
   if (!p && !pv) { sinProducto.push(f); continue; }
   const prod = p || pv;
