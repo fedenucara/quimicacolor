@@ -2,3 +2,5 @@
 imagenes-con-marca/
 # Copias de seguridad locales
 _backup/
+# Dependencias de las herramientas (sharp, pdf-parse)
+sistema/node_modules/

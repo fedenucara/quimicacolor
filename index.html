@@ -106,6 +106,7 @@
       flex-shrink: 0;
       object-fit: contain;
     }
+    a.logo { text-decoration: none; }
     .logo-text { color: var(--gray-900); }
     .logo-text span { color: var(--c-orange); }
     nav { display: flex; gap: 2px; align-items: center; }
@@ -433,7 +434,7 @@
     .apps-section .section-header p { color: #94A3B8; }
     .apps-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
     .app-card {
@@ -586,7 +587,8 @@
       margin-bottom: 14px;
     }
     .f-logo-mark {
-      height: 38px;
+      height: 44px;
+      filter: brightness(1.18) saturate(1.1);
       width: auto;
       object-fit: contain;
     }
@@ -667,9 +669,9 @@
   <!-- HEADER -->
   <header>
     <div class="nav-inner">
-      <div class="logo">
+      <a class="logo" href="index.html" aria-label="Inicio">
         <img class="logo-mark" src="logo.webp" alt="Química Color" />
-      </div>
+      </a>
       <nav>
         <a href="#productos">Productos</a>
         <a href="#aplicaciones">Aplicaciones</a>
@@ -879,6 +881,10 @@
           <div class="app-icon">🧱</div>
           <h4>Construcción y Cemento</h4>
         </div>
+        <div class="app-card">
+          <div class="app-icon">🌾</div>
+          <h4>Agro</h4>
+        </div>
       </div>
     </div>
   </section>
@@ -945,7 +951,7 @@
       <div class="footer-grid">
         <div>
           <div class="f-logo">
-            <img class="f-logo-mark" src="logo.webp" alt="Química Color" />
+            <img class="f-logo-mark" src="logo-marca.webp" alt="" />
             Química<span>Color</span>
           </div>
           <p class="footer-desc">Distribuidores de colorantes, pigmentos, dispersiones y aditivos para la industria argentina desde hace más de 30 años.</p>

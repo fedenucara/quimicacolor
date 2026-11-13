@@ -41,6 +41,7 @@
     }
     .logo { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
     .logo img { height: 62px; width: auto; object-fit: contain; }
+    a.logo { text-decoration: none; color: inherit; }
     nav { display: flex; gap: 4px; align-items: center; }
     nav a { padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--gray-700); transition: background .15s; }
     nav a:hover { background: var(--gray-50); color: var(--gray-900); }
@@ -408,7 +409,7 @@
 
 <header>
   <div class="nav-inner">
-    <div class="logo"><img src="logo.webp" alt="Química Color" /></div>
+    <a class="logo" href="index.html" aria-label="Inicio"><img src="logo.webp" alt="Química Color" /></a>
     <nav>
       <a href="index.html">Inicio</a>
       <a href="#" style="color:#F97316; font-weight:700;">Productos</a>

@@ -7,7 +7,7 @@
 import fs from 'node:fs'; import path from 'node:path'; import vm from 'node:vm';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
-const sharp = require('C:/Users/feden/AppData/Local/Temp/claude/c--Users-feden-ruo-web/d5a0242e-b611-4841-9d85-f3d6945d61ae/scratchpad/herr/node_modules/sharp');
+const sharp = require('sharp');
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const [carpeta, modo] = process.argv.slice(2);
