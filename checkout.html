@@ -385,7 +385,7 @@
                   <label>¿Qué factura necesitás?</label>
                   <div class="opts">
                     <label class="opt"><input type="radio" name="fFactura" value="A" checked onchange="cambioFactura()"><div><b>Factura A</b><span>Responsable inscripto. Al total se le suma el 21% de IVA. Necesitamos tu CUIT y razón social.</span></div></label>
-                    <label class="opt"><input type="radio" name="fFactura" value="C" onchange="cambioFactura()"><div><b>Factura C</b><span>Consumidor final o monotributista. El precio de lista es el precio final, sin IVA.</span></div></label>
+                    <label class="opt"><input type="radio" name="fFactura" value="C" onchange="cambioFactura()"><div><b>Factura C</b><span>Consumidor final o monotributista. El precio de lista es el precio final, sin IVA.</span><span id="facturaCNota" style="display:none;color:#dc2626;font-weight:600;"></span></div></label>
                   </div>
                 </div>
 
@@ -466,7 +466,19 @@
   let envioElegido = null;    // { id, nombre, precio (ARS), tipo } o null
   let cotizacionesEnvio = []; // lo que devolvió Andreani
 
-  function facturaElegida() { const r = document.querySelector('input[name="fFactura"]:checked'); return r ? r.value : 'A'; }
+  // Los envases grandes (20 y 25 kg) se venden solo con Factura A.
+  const KG_SOLO_FACTURA_A = 20;
+  function hayEnvaseGrande() { return carrito.some(i => { const m = String(i.id).match(/_(d+)kg$/); return m && Number(m[1]) >= KG_SOLO_FACTURA_A; }); }
+  function aplicarReglaFactura() {
+    const c = document.querySelector('input[name="fFactura"][value="C"]'), a = document.querySelector('input[name="fFactura"][value="A"]'), nota = document.getElementById('facturaCNota');
+    if (!c || !a) return;
+    const grande = hayEnvaseGrande();
+    c.disabled = grande;
+    if (grande && c.checked) a.checked = true;
+    if (nota) { nota.style.display = grande ? 'block' : 'none'; nota.textContent = grande ? 'Los envases de 20 y 25 kg se venden solo con Factura A.' : ''; }
+    c.closest('.opt').style.opacity = grande ? '.55' : '';
+  }
+  function facturaElegida() { if (hayEnvaseGrande()) return 'A'; const r = document.querySelector('input[name="fFactura"]:checked'); return r ? r.value : 'A'; }
 
   function pintarBanco() {
     const t = facturaElegida(), b = BANCOS[t];
@@ -584,6 +596,7 @@
   function fmt(n) { return 'USD ' + Number(n).toLocaleString('en-US'); }
 
   function renderOrder() {
+    aplicarReglaFactura();
     const el = document.getElementById('orderItems');
     el.innerHTML = carrito.map(item => {
       const thumb = item.imagen
