@@ -397,7 +397,7 @@
                   </div>
                   <div class="envio-msg" id="envioMsg">Poné tu código postal y cotizá el envío a domicilio o a sucursal de Andreani. El costo lo pagás vos junto con el pedido.</div>
                   <div class="opts" id="envioOpts" style="margin-top:10px;">
-                    <label class="opt"><input type="radio" name="fEnvio" value="retiro" onchange="cambioEnvio()"><div><b>Retiro en planta</b><span>Sin costo. Coordinamos día y horario por WhatsApp.</span></div><span class="opt-precio">$ 0</span></label>
+                    <label class="opt"><input type="radio" name="fEnvio" value="retiro" onchange="cambioEnvio()"><div><b>Retiro en planta (Villa Martelli)</b><span>Sin costo. Coordinamos día y horario por WhatsApp.</span></div><span class="opt-precio">$ 0</span></label>
                     <label class="opt"><input type="radio" name="fEnvio" value="otro" checked onchange="cambioEnvio()"><div><b>Otro transporte</b><span>Lo coordinamos por WhatsApp (OCA, Vía Cargo, expreso, etc.). Se despacha con pago en destino.</span></div></label>
                   </div>
                   <input type="text" id="fTransporte" placeholder="¿Cuál? Ej: OCA, Vía Cargo, expreso..." autocomplete="off" style="margin-top:8px;" />
@@ -545,7 +545,7 @@
     const cont = document.getElementById('envioOpts');
     const andreani = cotizacionesEnvio.map(o => `<label class="opt"><input type="radio" name="fEnvio" value="${o.id}" onchange="cambioEnvio()"><div><b>${o.nombre}</b><span>${o.tipo === 'S' ? 'Lo retirás en la sucursal de Andreani más cercana.' : 'Entrega en la dirección del formulario.'} Se paga junto con el pedido.</span></div><span class="opt-precio">$ ${Number(o.precio).toLocaleString('es-AR')}</span></label>`).join('');
     cont.innerHTML = andreani +
-      `<label class="opt"><input type="radio" name="fEnvio" value="retiro" onchange="cambioEnvio()"><div><b>Retiro en planta</b><span>Sin costo. Coordinamos día y horario por WhatsApp.</span></div><span class="opt-precio">$ 0</span></label>` +
+      `<label class="opt"><input type="radio" name="fEnvio" value="retiro" onchange="cambioEnvio()"><div><b>Retiro en planta (Villa Martelli)</b><span>Sin costo. Coordinamos día y horario por WhatsApp.</span></div><span class="opt-precio">$ 0</span></label>` +
       `<label class="opt"><input type="radio" name="fEnvio" value="otro"${andreani ? '' : ' checked'} onchange="cambioEnvio()"><div><b>Otro transporte</b><span>Lo coordinamos por WhatsApp. Se despacha con pago en destino.</span></div></label>`;
     if (andreani) cont.querySelector('input[name="fEnvio"]').checked = true;
     cambioEnvio();
@@ -556,7 +556,7 @@
     const v = r ? r.value : 'otro';
     const otro = document.getElementById('fTransporte');
     if (otro) otro.style.display = v === 'otro' ? '' : 'none';
-    if (v === 'retiro') envioElegido = { id: 'retiro', nombre: 'Retiro en planta', precio: 0, tipo: 'R' };
+    if (v === 'retiro') envioElegido = { id: 'retiro', nombre: 'Retiro en planta (Villa Martelli)', precio: 0, tipo: 'R' };
     else if (v === 'otro') envioElegido = null;
     else envioElegido = cotizacionesEnvio.find(o => o.id === v) || null;
     renderOrder();
