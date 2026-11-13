@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /checkout
+Sitemap: https://quimicacolor.com.ar/sitemap.xml
