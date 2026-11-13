@@ -141,6 +141,17 @@
     .form-group textarea { resize: vertical; min-height: 80px; }
     .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
     .optional-tag { font-size: 10px; font-weight: 500; color: var(--gray-400); margin-left: 4px; }
+    .opts { display: grid; gap: 8px; margin-top: 6px; }
+    .opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1.5px solid var(--gray-200); border-radius: 10px; cursor: pointer; background: #fff; }
+    .opt:has(input:checked) { border-color: #F97316; background: #fff7ed; }
+    .opt input { margin-top: 3px; accent-color: #F97316; }
+    .opt b { display: block; font-size: 13px; color: var(--gray-900); }
+    .opt span { font-size: 12px; color: var(--gray-500); line-height: 1.4; }
+    .opt .opt-precio { margin-left: auto; font-weight: 800; font-size: 13px; color: var(--gray-900); white-space: nowrap; }
+    .btn-cotizar { padding: 10px 14px; border-radius: 9px; border: 1.5px solid var(--gray-900); background: var(--gray-900); color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; }
+    .btn-cotizar:disabled { opacity: .5; cursor: wait; }
+    .envio-msg { font-size: 12px; color: var(--gray-500); margin-top: 6px; }
+    .envio-msg.err { color: #dc2626; }
 
     .btn-submit {
       width: 100%; padding: 16px; margin-top: 8px;
@@ -261,7 +272,7 @@
           <div class="order-summary-foot">
             <div class="order-count" id="orderCount"></div>
             <div id="dolarTotalARS" style="display:none;font-size:13px;color:#15803d;font-weight:700;margin-top:4px;">
-              ≈ <span id="dolarTotalVal"></span> ARS + IVA
+              ≈ <span id="dolarTotalVal"></span> ARS <span id="dolarTotalNota" style="font-weight:500;color:#6b7280;"></span>
               <span style="font-size:10px;font-weight:400;color:#6b7280;">(dólar oficial venta)</span>
             </div>
           </div>
@@ -270,38 +281,8 @@
         <!-- DATOS BANCARIOS -->
         <div class="bank-card">
           <div class="bank-card-head">🏦 Pagá por transferencia bancaria</div>
-          <div class="bank-rows">
-            <div class="bank-row">
-              <span class="bank-row-label">Banco</span>
-              <span class="bank-row-value">BBVA Argentina S.A.</span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">Cuenta</span>
-              <span class="bank-row-value">CA $ 328-342344/7</span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">CBU</span>
-              <span style="display:flex;align-items:center;gap:8px;">
-                <span class="bank-row-value" id="bankCBU2">0170328140000034234477</span>
-                <button class="copy-btn" onclick="copiar('bankCBU2')">copiar</button>
-              </span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">Alias</span>
-              <span style="display:flex;align-items:center;gap:8px;">
-                <span class="bank-row-value" id="bankAlias2">FedeNucaraBBVA</span>
-                <button class="copy-btn" onclick="copiar('bankAlias2')">copiar</button>
-              </span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">Titular</span>
-              <span class="bank-row-value">Federico Javier Nucara</span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">CUIL</span>
-              <span class="bank-row-value">20-32359997-2</span>
-            </div>
-          </div>
+          <div style="font-size:12px;color:#6b7280;margin:-4px 0 8px;">Cuenta para <strong id="bankTipo1">Factura A</strong>. Elegí el tipo de factura en el formulario.</div>
+          <div class="bank-rows" id="bankRows1"></div>
           <div id="dolarBox" style="margin:12px 0 4px;padding:12px 16px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;display:none;">
             <div style="font-size:11px;font-weight:700;color:#15803d;letter-spacing:.5px;margin-bottom:6px;">💵 DÓLAR OFICIAL HOY</div>
             <div style="display:flex;justify-content:space-between;align-items:baseline;">
@@ -392,7 +373,7 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label for="fCP">Código postal <span class="optional-tag">opcional</span></label>
-                    <input type="text" id="fCP" placeholder="1043" autocomplete="postal-code" />
+                    <input type="text" id="fCP" placeholder="1043" autocomplete="postal-code" oninput="const c=document.getElementById('fCPEnvio'); if(c && !c.value) c.value=this.value.replace(/\D/g,'').slice(0,4);" />
                   </div>
                   <div class="form-group">
                     <label for="fTelefono">Teléfono / WhatsApp</label>
@@ -401,9 +382,25 @@
                 </div>
 
                 <div class="form-group">
-                  <label for="fTransporte">Transporte de preferencia <span class="optional-tag">opcional</span></label>
-                  <input type="text" id="fTransporte" placeholder="Ej: OCA, Andreani, Via Cargo, Retiro en planta..." autocomplete="off" />
-                  <p style="margin:4px 0 0;font-size:12px;color:#6b7280;">El envío se despacha con pago en destino.</p>
+                  <label>¿Qué factura necesitás?</label>
+                  <div class="opts">
+                    <label class="opt"><input type="radio" name="fFactura" value="A" checked onchange="cambioFactura()"><div><b>Factura A</b><span>Responsable inscripto. Al total se le suma el 21% de IVA. Necesitamos tu CUIT y razón social.</span></div></label>
+                    <label class="opt"><input type="radio" name="fFactura" value="C" onchange="cambioFactura()"><div><b>Factura C</b><span>Consumidor final o monotributista. El precio de lista es el precio final, sin IVA.</span></div></label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Envío</label>
+                  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                    <input type="text" id="fCPEnvio" placeholder="Código postal" inputmode="numeric" maxlength="4" style="width:140px;" autocomplete="postal-code" />
+                    <button type="button" class="btn-cotizar" id="btnCotizar" onclick="cotizarEnvio()">Cotizar con Andreani</button>
+                  </div>
+                  <div class="envio-msg" id="envioMsg">Poné tu código postal y cotizá el envío a domicilio o a sucursal de Andreani. El costo lo pagás vos junto con el pedido.</div>
+                  <div class="opts" id="envioOpts" style="margin-top:10px;">
+                    <label class="opt"><input type="radio" name="fEnvio" value="retiro" onchange="cambioEnvio()"><div><b>Retiro en planta</b><span>Sin costo. Coordinamos día y horario por WhatsApp.</span></div><span class="opt-precio">$ 0</span></label>
+                    <label class="opt"><input type="radio" name="fEnvio" value="otro" checked onchange="cambioEnvio()"><div><b>Otro transporte</b><span>Lo coordinamos por WhatsApp (OCA, Vía Cargo, expreso, etc.). Se despacha con pago en destino.</span></div></label>
+                  </div>
+                  <input type="text" id="fTransporte" placeholder="¿Cuál? Ej: OCA, Vía Cargo, expreso..." autocomplete="off" style="margin-top:8px;" />
                 </div>
 
                 <div class="form-group">
@@ -436,38 +433,8 @@
 
         <div class="bank-card">
           <div class="bank-card-head">🏦 Datos bancarios (para cuando confirmemos el pedido)</div>
-          <div class="bank-rows">
-            <div class="bank-row">
-              <span class="bank-row-label">Banco</span>
-              <span class="bank-row-value" id="bankNombre"></span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">Cuenta</span>
-              <span class="bank-row-value" id="bankCuenta"></span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">CBU</span>
-              <span>
-                <span class="bank-row-value" id="bankCBU"></span>
-                <button class="copy-btn" onclick="copiar('bankCBU')">copiar</button>
-              </span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">Alias</span>
-              <span>
-                <span class="bank-row-value" id="bankAlias"></span>
-                <button class="copy-btn" onclick="copiar('bankAlias')">copiar</button>
-              </span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">Titular</span>
-              <span class="bank-row-value" id="bankTitular"></span>
-            </div>
-            <div class="bank-row">
-              <span class="bank-row-label">CUIL</span>
-              <span class="bank-row-value" id="bankCuil"></span>
-            </div>
-          </div>
+          <div style="font-size:12px;color:#6b7280;margin:-4px 0 8px;">Cuenta para <strong id="bankTipo2">Factura A</strong>.</div>
+          <div class="bank-rows" id="bankRows2"></div>
           <div class="bank-note">
             ⚠️ <strong>Importante:</strong> no realices la transferencia hasta que confirmemos el monto total por WhatsApp.
           </div>
@@ -489,14 +456,99 @@
 
 <script>
   // ⚙️ CONFIGURAR: completar con los datos bancarios reales
-  const BANCO = {
-    nombre:   'BBVA Argentina S.A.',
-    cuenta:   'CA $ 328-342344/7',
-    cbu:      '0170328140000034234477',
-    alias:    'FedeNucaraBBVA',
-    titular:  'Federico Javier Nucara',
-    cuil:     '20-32359997-2',
+  // Factura A: cuenta de Luis Calvano (responsable inscripto, se suma 21% de IVA).
+  // Factura C: cuenta de Federico (monotributo, el precio de lista es final).
+  const BANCOS = {
+    A: { nombre: 'Banco Santander', cuenta: 'CU $ 476-350063-7', cbu: '0720476488000035006372', alias: 'luiscalvano', titular: 'Luis Antonio Calvano', doc: 'CUIT 20-08511584-8' },
+    C: { nombre: 'BBVA Argentina S.A.', cuenta: 'CA $ 328-342344/7', cbu: '0170328140000034234477', alias: 'FedeNucaraBBVA', titular: 'Federico Javier Nucara', doc: 'CUIL 20-32359997-2' },
   };
+  let dolarVenta = null;      // cotización del dólar oficial (venta), cuando carga
+  let envioElegido = null;    // { id, nombre, precio (ARS), tipo } o null
+  let cotizacionesEnvio = []; // lo que devolvió Andreani
+
+  function facturaElegida() { const r = document.querySelector('input[name="fFactura"]:checked'); return r ? r.value : 'A'; }
+
+  function pintarBanco() {
+    const t = facturaElegida(), b = BANCOS[t];
+    const fila = (lbl, val, copiable) => `<div class="bank-row"><span class="bank-row-label">${lbl}</span>${copiable
+      ? `<span style="display:flex;align-items:center;gap:8px;"><span class="bank-row-value" id="${copiable}">${val}</span><button class="copy-btn" type="button" onclick="copiar('${copiable}')">copiar</button></span>`
+      : `<span class="bank-row-value">${val}</span>`}</div>`;
+    ['1','2'].forEach(n => {
+      const cont = document.getElementById('bankRows' + n); if (!cont) return;
+      cont.innerHTML = fila('Banco', b.nombre) + fila('Cuenta', b.cuenta) + fila('CBU', b.cbu, 'bankCBU' + n) + fila('Alias', b.alias, 'bankAlias' + n) + fila('Titular', b.titular) + fila(b.doc.split(' ')[0], b.doc.split(' ')[1]);
+      const tipo = document.getElementById('bankTipo' + n); if (tipo) tipo.textContent = 'Factura ' + t;
+    });
+  }
+
+  function cambioFactura() { renderOrder(); }
+
+  function pintarARS() {
+    const box = document.getElementById('dolarTotalARS'); if (!box) return;
+    const conPrecio = carrito.filter(i => i.precio != null);
+    if (!dolarVenta || conPrecio.length === 0) { box.style.display = 'none'; return; }
+    const subtotalUSD = conPrecio.reduce((s, i) => s + i.precio * i.cantidad, 0);
+    const conIva = facturaElegida() === 'A' ? subtotalUSD * 1.21 : subtotalUSD;
+    const envio = envioElegido && envioElegido.precio > 0 ? envioElegido.precio : 0;
+    const totalARS = conIva * dolarVenta + envio;
+    document.getElementById('dolarTotalVal').textContent = '$ ' + Number(totalARS).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    document.getElementById('dolarTotalNota').textContent = (facturaElegida() === 'A' ? 'con IVA' : 'Factura C') + (envio ? ' y envío' : '');
+    box.style.display = 'block';
+  }
+
+  // ── Envío con Andreani ──
+  function itemsParaCotizar() {
+    return carrito.map(i => {
+      const m = String(i.id).match(/_(\d+)kg$/);
+      const kg = m ? Number(m[1]) : 1;
+      const tipo = i.categoria === 'dispersiones' ? 'dispersion' : (i.subcategoria === 'Otros' ? 'liquido' : 'polvo');
+      return { kg, cantidad: i.cantidad, tipo };
+    });
+  }
+
+  async function cotizarEnvio() {
+    const cp = (document.getElementById('fCPEnvio').value || '').replace(/\D/g, '').slice(0, 4);
+    const msg = document.getElementById('envioMsg'), btn = document.getElementById('btnCotizar');
+    if (cp.length !== 4) { msg.textContent = 'Poné un código postal de 4 números.'; msg.className = 'envio-msg err'; return; }
+    if (!document.getElementById('fCP').value) document.getElementById('fCP').value = cp;
+    btn.disabled = true; msg.textContent = 'Cotizando con Andreani…'; msg.className = 'envio-msg';
+    try {
+      const conPrecio = carrito.filter(i => i.precio != null);
+      const valorUSD = conPrecio.reduce((s, i) => s + i.precio * i.cantidad, 0);
+      const valorARS = Math.round(valorUSD * (dolarVenta || 1000));
+      const r = await fetch('/api/cotizar', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ cp, items: itemsParaCotizar(), valor: valorARS }) });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'No se pudo cotizar.');
+      cotizacionesEnvio = j.opciones;
+      pintarOpcionesEnvio();
+      msg.textContent = `Cotizado a CP ${cp}. Elegí una opción.${j.faltan && j.faltan.length ? ' No se pudo incluir: ' + j.faltan.join(', ') + '.' : ''}`;
+      msg.className = 'envio-msg';
+    } catch (e) {
+      cotizacionesEnvio = []; pintarOpcionesEnvio();
+      msg.textContent = (e && e.message ? e.message : 'No se pudo cotizar.') + ' Podés elegir retiro en planta u otro transporte.';
+      msg.className = 'envio-msg err';
+    } finally { btn.disabled = false; }
+  }
+
+  function pintarOpcionesEnvio() {
+    const cont = document.getElementById('envioOpts');
+    const andreani = cotizacionesEnvio.map(o => `<label class="opt"><input type="radio" name="fEnvio" value="${o.id}" onchange="cambioEnvio()"><div><b>${o.nombre}</b><span>${o.tipo === 'S' ? 'Lo retirás en la sucursal de Andreani más cercana.' : 'Entrega en la dirección del formulario.'} Se paga junto con el pedido.</span></div><span class="opt-precio">$ ${Number(o.precio).toLocaleString('es-AR')}</span></label>`).join('');
+    cont.innerHTML = andreani +
+      `<label class="opt"><input type="radio" name="fEnvio" value="retiro" onchange="cambioEnvio()"><div><b>Retiro en planta</b><span>Sin costo. Coordinamos día y horario por WhatsApp.</span></div><span class="opt-precio">$ 0</span></label>` +
+      `<label class="opt"><input type="radio" name="fEnvio" value="otro"${andreani ? '' : ' checked'} onchange="cambioEnvio()"><div><b>Otro transporte</b><span>Lo coordinamos por WhatsApp. Se despacha con pago en destino.</span></div></label>`;
+    if (andreani) cont.querySelector('input[name="fEnvio"]').checked = true;
+    cambioEnvio();
+  }
+
+  function cambioEnvio() {
+    const r = document.querySelector('input[name="fEnvio"]:checked');
+    const v = r ? r.value : 'otro';
+    const otro = document.getElementById('fTransporte');
+    if (otro) otro.style.display = v === 'otro' ? '' : 'none';
+    if (v === 'retiro') envioElegido = { id: 'retiro', nombre: 'Retiro en planta', precio: 0, tipo: 'R' };
+    else if (v === 'otro') envioElegido = null;
+    else envioElegido = cotizacionesEnvio.find(o => o.id === v) || null;
+    renderOrder();
+  }
 
   const WA_NUMBER = '5491137608638';
 
@@ -572,18 +624,30 @@
 
     const totalEl = document.getElementById('orderTotal');
     if (conPrecio.length > 0) {
-      totalEl.innerHTML = `
+      const fac = facturaElegida();
+      const iva = fac === 'A' ? Math.round(subtotal * 0.21 * 100) / 100 : 0;
+      const total = subtotal + iva;
+      const filas = [];
+      if (fac === 'A') {
+        filas.push(`<div class="order-total" style="padding:4px 0;"><div class="order-total-label" style="font-weight:500;">Subtotal sin IVA</div><div style="font-weight:600;">${fmt(subtotal)}</div></div>`);
+        filas.push(`<div class="order-total" style="padding:4px 0;"><div class="order-total-label" style="font-weight:500;">IVA 21%</div><div style="font-weight:600;">${fmt(iva)}</div></div>`);
+      }
+      if (envioElegido && envioElegido.precio > 0) {
+        filas.push(`<div class="order-total" style="padding:4px 0;"><div class="order-total-label" style="font-weight:500;">${envioElegido.nombre}</div><div style="font-weight:600;">$ ${Number(envioElegido.precio).toLocaleString('es-AR')} ARS</div></div>`);
+      }
+      totalEl.innerHTML = filas.join('') + `
         <div class="order-total">
           <div>
-            <div class="order-total-label">${todosConPrecio ? 'Total' : 'Subtotal'} <span style="font-weight:500;color:var(--gray-500);">+ IVA</span></div>
+            <div class="order-total-label">${todosConPrecio ? 'Total' : 'Subtotal'} ${fac === 'A' ? '<span style="font-weight:500;color:var(--gray-500);">con IVA</span>' : '<span style="font-weight:500;color:var(--gray-500);">precio final, Factura C</span>'}</div>
             ${!todosConPrecio ? `<div class="order-total-partial">+ ${sinPrecio.length} producto${sinPrecio.length>1?'s':''} a confirmar precio</div>` : ''}
           </div>
-          <div class="order-total-value">${fmt(subtotal)}</div>
-        </div>
-        <div style="font-size:11px;color:var(--gray-500);text-align:right;margin-top:4px;">Los precios no incluyen IVA.</div>`;
+          <div class="order-total-value">${fmt(total)}${envioElegido && envioElegido.precio > 0 ? ' <span style="font-size:12px;font-weight:600;color:var(--gray-500);">+ envío</span>' : ''}</div>
+        </div>`;
     } else {
       totalEl.innerHTML = '';
     }
+    pintarBanco();
+    pintarARS();
   }
 
   // ── DÓLAR OFICIAL ──────────────────────────────────────────────
@@ -592,6 +656,7 @@
       .then(r => r.json())
       .then(d => {
         const venta   = d.venta;
+        dolarVenta = venta;
         const compra  = d.compra;
         const fmt$    = v => '$ ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
         document.getElementById('dolarCompra').textContent = fmt$(compra);
@@ -600,15 +665,7 @@
         document.getElementById('dolarFecha').textContent =
           'Actualizado: ' + fecha.toLocaleDateString('es-AR') + ' ' + fecha.toLocaleTimeString('es-AR', {hour:'2-digit',minute:'2-digit'});
         document.getElementById('dolarBox').style.display = 'block';
-        // Mostrar total del pedido en ARS si hay precios en USD
-        const conPrecio = carrito.filter(i => i.precio != null);
-        if (conPrecio.length > 0) {
-          const subtotalUSD = conPrecio.reduce((s, i) => s + i.precio * i.cantidad, 0);
-          const totalARS    = subtotalUSD * venta;
-          document.getElementById('dolarTotalVal').textContent =
-            '$ ' + Number(totalARS).toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
-          document.getElementById('dolarTotalARS').style.display = 'block';
-        }
+        pintarARS();
       })
       .catch(() => {}); // Si falla la API, no mostrar nada
   }
@@ -621,12 +678,6 @@
     renderOrder();
     cargarDolar();
     // Cargar datos bancarios en la sección de confirmación
-    document.getElementById('bankNombre').textContent  = BANCO.nombre;
-    document.getElementById('bankCuenta').textContent  = BANCO.cuenta;
-    document.getElementById('bankCBU').textContent     = BANCO.cbu;
-    document.getElementById('bankAlias').textContent   = BANCO.alias;
-    document.getElementById('bankTitular').textContent = BANCO.titular;
-    document.getElementById('bankCuil').textContent    = BANCO.cuil;
   }
 
   // ── SUBMIT ─────────────────────────────────────────────────────
@@ -658,13 +709,20 @@
 
     let msg = `Hola Química Color! Quiero hacer el siguiente pedido:\n\n`;
     msg += `*PRODUCTOS:*\n${lineasProd}\n`;
+    const fac = facturaElegida();
     if (hayTotal) {
+      const iva = fac === 'A' ? Math.round(subtotal * 0.21 * 100) / 100 : 0;
+      if (fac === 'A') msg += `\nSubtotal sin IVA: ${fmt(subtotal)}\nIVA 21%: ${fmt(iva)}`;
       msg += todosTienen
-        ? `\n*TOTAL: ${fmt(subtotal)} + IVA*\n\n`
-        : `\n*Subtotal: ${fmt(subtotal)} + IVA* (+ productos a confirmar precio)\n\n`;
+        ? `\n*TOTAL: ${fmt(subtotal + iva)}${fac === 'A' ? ' con IVA' : ' (Factura C, precio final)'}*`
+        : `\n*Subtotal: ${fmt(subtotal + iva)}* (+ productos a confirmar precio)`;
+      if (dolarVenta) msg += ` ≈ $ ${Math.round((subtotal + iva) * dolarVenta).toLocaleString('es-AR')} ARS al dólar oficial de hoy`;
+      msg += `\n\n`;
     } else {
       msg += `\n`;
     }
+    msg += `*FACTURA:* ${fac === 'A' ? 'A (responsable inscripto)' : 'C'}\n`;
+    msg += `*ENVÍO:* ${envioElegido ? envioElegido.nombre + (envioElegido.precio > 0 ? ' — $ ' + Number(envioElegido.precio).toLocaleString('es-AR') + ' ARS' : '') : 'Otro transporte' + (transporte ? ' (' + transporte + ')' : '') + ', a coordinar'}\n\n`;
     msg += `*DATOS DE ENVÍO:*\n`;
     msg += `Nombre: ${nombre}\n`;
     msg += `DNI/CUIT: ${dni}\n`;
@@ -674,7 +732,7 @@
     if (cp) msg += ` — CP ${cp}`;
     msg += `\nTeléfono: ${tel}`;
     if (email) msg += `\nEmail: ${email}`;
-    if (transporte) msg += `\nTransporte: ${transporte}`;
+
     if (notas) msg += `\n\nNotas: ${notas}`;
     msg += `\n\nAguardo confirmación. ¡Gracias!`;
 
