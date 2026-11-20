@@ -2,6 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/alta", "destination": "https://nuki-fede.vercel.app/alta" }
+  ],
   "redirects": [
     { "source": "/(.*)",
       "has": [
